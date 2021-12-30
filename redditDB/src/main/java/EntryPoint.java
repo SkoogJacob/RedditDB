@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class EntryPoint {
     public static void main(String[] args) throws SQLException {
-        System.out.println(Base36.toBase36("1234324502934"));
+        System.out.println(Base36.toBase36("12344564564646546544502934"));
         File smallFile = new File(args[0]);
         System.out.println(smallFile.isFile());
         try (Connection conn = DriverManager.getConnection(CONNINFO.URL.toString(), CONNINFO.USERNAME.toString(), CONNINFO.PASSWORD.toString())) {

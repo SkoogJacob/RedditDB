@@ -12,8 +12,12 @@ public class Base36 {
     private static final long[] positions = {1, 36, 1296, 46_656, 1_679_616, 60_466_176,
             2_176_782_336L, 78_364_164_096L, 2_821_109_907_456L, 101_559_956_668_416L,
             3_656_158_440_062_976L, 131_621_703_842_267_136L, 4_738_381_338_321_616_896L};
-    private static final long eleventhPos = 3_656_158_440_062_976L;
 
+    /**
+     * Converts a string with a number in base 10 into base 36.
+     * @param base10 The number encoded as a string in base 10.
+     * @return The number encoded as a string in base 36.
+     */
     public static String toBase36(String base10) {
         if (base10.length() > positions.length) {
             byte[] bytes = base10.getBytes(StandardCharsets.UTF_8);
@@ -21,6 +25,12 @@ public class Base36 {
         }
         return toBase36(Long.parseLong(base10));
     }
+
+    /**
+     * Converts 'smaller' numbers (i.e. fits in long) to base36 encoded strings.
+     * @param base10 A long to encode.
+     * @return A string that has the number in base 36.
+     */
     public static String toBase36(long base10) {
         String encoded = ""; // using string instead of StringBuilder as the string here will be short (max 13 characters)
         int maxPos = 0;
@@ -34,7 +44,14 @@ public class Base36 {
         }
         return encoded;
     }
-    public static String stringFromBase36(String base36) {
+
+    /**
+     * Converts from a string encoded in base 36 to a string in base 10.
+     *
+     * @param base36 A base 36 number as a string.
+     * @return The string as a base 10 number.
+     */
+    public static String fromBase36(String base36) {
         try {
             BigInteger base = new BigInteger(base36, radix);
             return base.toString(10);
@@ -44,6 +61,7 @@ public class Base36 {
         return null;
     }
     public static long longFromBase36(String base36) {
+        if (base36.length() > positions.length) return Long.MIN_VALUE;
         char[] chars = base36.toCharArray();
         int length = chars.length;
         long number = 0;
