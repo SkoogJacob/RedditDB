@@ -153,5 +153,7 @@ buildNumber.properties
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
 
-# End of https://www.toptal.com/developers/gitignore/api/linux,intellij+all,java,maven
 
+# End of https://www.toptal.com/developers/gitignore/api/linux,intellij+all,java,maven
+/secrets/
+/redditDB/src/main/java/secrets/*
