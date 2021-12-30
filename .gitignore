@@ -158,3 +158,4 @@ buildNumber.properties
 /secrets/
 /redditDB/src/main/java/secrets/*
 /redditFiles
+/redditDB/src/main/resources/reddit_data/
