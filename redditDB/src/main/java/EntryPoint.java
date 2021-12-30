@@ -5,7 +5,7 @@ import java.sql.*;
 public class EntryPoint {
     public static void main(String[] args) throws SQLException {
         try (Connection conn = DriverManager.getConnection(CONNINFO.URL.toString(), CONNINFO.USERNAME.toString(), CONNINFO.PASSWORD.toString())) {
-            conn.setCatalog("test");
+            conn.setCatalog("reddit_db");
             try (Statement stmt = conn.createStatement()) {
                 try (ResultSet rs = stmt.executeQuery("SELECT ID FROM classes")) {
                     rs.first();
