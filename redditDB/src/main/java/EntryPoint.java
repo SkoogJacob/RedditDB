@@ -1,8 +1,8 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
+import io.github.cdimascio.dotenv.Dotenv;
 import encoders.Base36;
-import secrets.CONNINFO;
 
 import javax.naming.Context;
 import java.io.*;
@@ -17,10 +17,17 @@ import java.util.stream.Stream;
 
 public class EntryPoint {
     public static void main(String[] args) throws SQLException {
-        System.out.println(Base36.toBase36("12344564564646546544502934"));
+        String ogB10 = "82384564123123091";
+        System.out.println("Number of b10 digits: " + ogB10.length());
+        String b36 = Base36.toBase36(ogB10);
+        String b10 = Base36.fromBase36(b36);
+        System.out.println("The original string: " + ogB10 + "\nIn base36: " + b36 +
+         "\nAnd back to b10: " + b10);
+
+        Dotenv dotenv = Dotenv.load();
         File smallFile = new File(args[0]);
         System.out.println(smallFile.isFile());
-        try (Connection conn = DriverManager.getConnection(CONNINFO.URL.toString(), CONNINFO.USERNAME.toString(), CONNINFO.PASSWORD.toString())) {
+        try (Connection conn = DriverManager.getConnection(dotenv.get("SQL_URL"), dotenv.get("SQL_UNAME"), dotenv.get("SQL_PWORD"))) {
             conn.setCatalog("reddit_db");
 //            try (Statement stmt = conn.createStatement()) {
 //                try (ResultSet rs = stmt.executeQuery("SELECT ID FROM classes")) {

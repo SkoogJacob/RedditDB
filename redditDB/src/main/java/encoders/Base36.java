@@ -19,9 +19,8 @@ public class Base36 {
      * @return The number encoded as a string in base 36.
      */
     public static String toBase36(String base10) {
-        if (base10.length() > positions.length) {
-            byte[] bytes = base10.getBytes(StandardCharsets.UTF_8);
-            return new BigInteger(1, bytes).toString(radix);
+        if (base10.length() > 18) {
+            return new BigInteger(base10).toString(radix);
         }
         return toBase36(Long.parseLong(base10));
     }
