@@ -1,11 +1,10 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
+import file_readers.RedditJSONExtractor;
 import io.github.cdimascio.dotenv.Dotenv;
-import encoders.Base36;
 import comments.FullComment;
 
-import javax.naming.Context;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,16 +13,24 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.LinkedList;
-import java.util.stream.Stream;
 
 public class EntryPoint {
     public static void main(String[] args) throws SQLException {
-        String ogB10 = "8238641";
-        System.out.println("Number of b10 digits: " + ogB10.length());
-        String b36 = Base36.toBase36(ogB10);
-        String b10 = Base36.fromBase36(b36);
-        System.out.println("The original string: " + ogB10 + "\nIn base36: " + b36 +
-         "\nAnd back to b10: " + b10);
+        try {
+            RedditJSONExtractor extractor = new RedditJSONExtractor(args[0]);
+//            JSONExtractor extractor = new JSONExtractor("/home/agryphos/unicourses/2dv513/a2/redditDB/src/main/resources/badjson");
+            while (extractor.hasNext()) {
+                String json = extractor.extractJSONObject();
+                System.out.println("Before");
+                System.out.println(json);
+                System.out.println("After");
+                Gson gson = new Gson();
+                System.out.println(gson.fromJson(json, FullComment.class).toString());
+
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         Dotenv dotenv = Dotenv.load();
         File smallFile = new File(args[0]);
