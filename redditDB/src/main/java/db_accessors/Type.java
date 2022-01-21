@@ -1,24 +1,47 @@
 package db_accessors;
 
+import comments.FullComment;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
+/**
+ * This class presents the type of a reddit comment in a user readable way.
+ */
 public class Type {
     @NotNull
     private final Types type;
 
     public Type(String type) {
         type = type.replaceAll("_", "");
-        switch (type.toLowerCase(Locale.ROOT)) {
-            case "t1" -> this.type = Types.t1;
-            case "t2" -> this.type = Types.t2;
-            case "t3" -> this.type = Types.t3;
-            case "t4" -> this.type = Types.t4;
-            case "t5" -> this.type = Types.t5;
-            case "t6" -> this.type = Types.t6;
+        this.type = translateToEnum(type);
+    }
+    public Type(FullComment comment) {
+        String typeString = comment.id().split("_")[0];
+        this.type = translateToEnum(typeString);
+    }
+
+    /**
+     * Allows to create a Type object from any ID string.
+     * @param name The ID (with type) of the comment
+     * @return
+     */
+    public static Type fromName(String name) {
+        String typeString = name.split("_")[0];
+        return new Type(typeString);
+    }
+    private Types translateToEnum(String typeString) {
+        Types t;
+        switch (typeString.toLowerCase(Locale.ROOT)) {
+            case "t1" -> t = Types.t1;
+            case "t2" -> t = Types.t2;
+            case "t3" -> t = Types.t3;
+            case "t4" -> t = Types.t4;
+            case "t5" -> t = Types.t5;
+            case "t6" -> t = Types.t6;
             default -> throw new IllegalArgumentException("This type is not recognized!");
         }
+        return t;
     }
     public String type() {
         String typeString = "Unknown";

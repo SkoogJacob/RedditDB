@@ -28,8 +28,7 @@ public record FullComment(String id, String name, String author,
         return Instant.ofEpochSecond(createdUTC).atZone(ZoneId.systemDefault()).toLocalDate();
     }
     public Type getCommentType() {
-        String typeString = this.id.split("_")[0];
-        return new Type(typeString);
+        return new Type(this);
     }
     public Type getParentType() {
         String typeString = this.parentID.split("_")[0];
