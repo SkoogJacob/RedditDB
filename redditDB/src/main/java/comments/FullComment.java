@@ -1,27 +1,19 @@
 package comments;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
-public class FullComment {
-    private String id; // COMMENT ID, not user ID
-    private String name; // Equals prefix + '_' + id;
-    private String author; // Username associated with id
-
-    @SerializedName("parent_id")
-    private String parentID;
-    @SerializedName("link_id")
-    private String linkID;
-
-    private String body; // The comment body
-
-    @SerializedName("subreddit_id")
-    private String subredditID;
-    private String subreddit; // Name associate with subredditID
-
-    private int score;
-    @SerializedName("created_utc")
-    private int createdUTC; // Time created UTC
-
+/**
+ * Represents the parts of a reddit comment from the source data that we are interested in.
+ * <p>
+ * Takes up some 80 bytes in pointers, 40*
+ */
+public record FullComment(String id, String name, String author,
+                          @Json(name = "parent_id") String parentID,
+                          @Json(name = "link_id") String linkID,
+                          String body,
+                          @Json(name = "subreddit_id") String subredditID,
+                          String subreddit, int score,
+                          @Json(name = "created_utc") int createdUTC) {
     public FullComment(
             String id, String name,
             String author, String parentID,
