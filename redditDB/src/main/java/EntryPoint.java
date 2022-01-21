@@ -17,13 +17,12 @@ public class EntryPoint {
             Moshi moshi = new Moshi.Builder().build();
             JsonAdapter<FullComment> adapter = moshi.adapter(FullComment.class);
             RedditJSONExtractor extractor = new RedditJSONExtractor("/home/agryphos/unicourses/2dv513/a2/redditDB/src/main/resources/badjson");
-            LinkedList<FullComment> blockingQueue = new LinkedList<>();
+            LinkedList<FullComment> list = new LinkedList<>();
             while (extractor.hasNext()) {
                 String json = extractor.extractJSONObject();
-                blockingQueue.add(adapter.fromJson(json));
+                list.add(adapter.fromJson(json));
             }
-            System.out.println(blockingQueue.size());
-            for (FullComment comment : blockingQueue) {
+            for (FullComment comment : list) {
                 System.out.println(comment);
             }
         } catch (FileNotFoundException e) {
