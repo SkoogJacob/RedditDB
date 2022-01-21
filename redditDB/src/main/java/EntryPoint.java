@@ -12,11 +12,10 @@ import java.util.LinkedList;
 
 public class EntryPoint {
     public static void main(String[] args) throws SQLException, IOException {
-        System.out.println(new java.io.File(".").getCanonicalPath());
         try {
             Moshi moshi = new Moshi.Builder().build();
             JsonAdapter<FullComment> adapter = moshi.adapter(FullComment.class);
-            RedditJSONExtractor extractor = new RedditJSONExtractor("/home/agryphos/unicourses/2dv513/a2/redditDB/src/main/resources/badjson");
+            RedditJSONExtractor extractor = new RedditJSONExtractor("./src/main/resources/badjson");
             LinkedList<FullComment> list = new LinkedList<>();
             while (extractor.hasNext()) {
                 String json = extractor.extractJSONObject();
