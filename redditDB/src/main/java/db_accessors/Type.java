@@ -12,21 +12,16 @@ public class Type {
     @NotNull
     private final Types type;
 
-    public Type(String type) {
-        type = type.replaceAll("_", "");
+    private Type(String type) {
         this.type = translateToEnum(type);
-    }
-    public Type(FullComment comment) {
-        String typeString = comment.id().split("_")[0];
-        this.type = translateToEnum(typeString);
     }
 
     /**
      * Allows to create a Type object from any ID string.
      * @param name The ID (with type) of the comment
-     * @return
+     * @return A Type object for presenting the type in different contexts.
      */
-    public static Type fromName(String name) {
+    public static Type fromCommentName(String name) {
         String typeString = name.split("_")[0];
         return new Type(typeString);
     }
