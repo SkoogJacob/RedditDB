@@ -1,0 +1,12 @@
+{
+  "db_catalog_name" : "reddit_db",
+  "db_tables" : [
+    {
+      "table_name": "reddit_comments_constrained",
+      "columns" : [
+        {"id": "String"}, {"type": "Enum"},"type", "author", "parent_id", "link_id", "body",
+        "score", "date", "subreddit"
+      ]
+    }
+  ]
+}
