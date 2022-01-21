@@ -31,17 +31,16 @@ public class Base36 {
      * @return A string that has the number in base 36.
      */
     public static String toBase36(long base10) {
-        String encoded = ""; // using string instead of StringBuilder as the string here will be short (max 13 characters)
+        StringBuilder encoded = new StringBuilder();
         int maxPos = 0;
-        while (base10 > positions[maxPos]) maxPos++;
-        maxPos--;
+        while (base10 > positions[maxPos + 1]) maxPos++;
         while (base10 > 0) {
             int posVal = (int) (base10 / positions[maxPos]); // Will always fit in int
-            encoded += Character.forDigit(posVal, radix);
+            encoded.append(Character.forDigit(posVal, radix));
             base10 = base10 - posVal * positions[maxPos];
             maxPos--;
         }
-        return encoded;
+        return encoded.toString();
     }
 
     /**

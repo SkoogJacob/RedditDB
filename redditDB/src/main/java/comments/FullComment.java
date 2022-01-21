@@ -2,6 +2,7 @@ package comments;
 
 import java.util.Base64;
 import java.util.Date;
+import com.google.gson.annotations.JsonAdapter;
 
 public class FullComment {
     private String id; // COMMENT ID, not user ID
