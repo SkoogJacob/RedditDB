@@ -17,6 +17,7 @@ import java.util.LinkedList;
 public class EntryPoint {
     public static void main(String[] args) throws SQLException {
         try {
+            Gson gson = new Gson();
             RedditJSONExtractor extractor = new RedditJSONExtractor(args[0]);
 //            JSONExtractor extractor = new JSONExtractor("/home/agryphos/unicourses/2dv513/a2/redditDB/src/main/resources/badjson");
             while (extractor.hasNext()) {
@@ -24,7 +25,6 @@ public class EntryPoint {
                 System.out.println("Before");
                 System.out.println(json);
                 System.out.println("After");
-                Gson gson = new Gson();
                 System.out.println(gson.fromJson(json, FullComment.class).toString());
 
             }
