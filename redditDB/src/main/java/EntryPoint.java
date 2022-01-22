@@ -3,6 +3,7 @@ import com.squareup.moshi.Moshi;
 import file_readers.RedditJSONExtractor;
 import io.github.cdimascio.dotenv.Dotenv;
 import comments.FullComment;
+import org.mariadb.jdbc.client.DataType;
 
 import java.io.*;
 import java.sql.Connection;
@@ -12,6 +13,7 @@ import java.util.LinkedList;
 
 public class EntryPoint {
     public static void main(String[] args) throws SQLException, IOException {
+        System.out.println(DataType.ENUM);
         try {
             Moshi moshi = new Moshi.Builder().build();
             JsonAdapter<FullComment> adapter = moshi.adapter(FullComment.class);
