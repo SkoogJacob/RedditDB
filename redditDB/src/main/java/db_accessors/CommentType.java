@@ -1,6 +1,5 @@
 package db_accessors;
 
-import comments.FullComment;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -8,11 +7,11 @@ import java.util.Locale;
 /**
  * This class presents the type of a reddit comment in a user readable way.
  */
-public class Type {
+public class CommentType {
     @NotNull
     private final Types type;
 
-    private Type(String type) {
+    private CommentType(String type) {
         this.type = translateToEnum(type);
     }
 
@@ -21,9 +20,9 @@ public class Type {
      * @param name The ID (with type) of the comment
      * @return A Type object for presenting the type in different contexts.
      */
-    public static Type fromCommentName(String name) {
+    public static CommentType fromCommentName(String name) {
         String typeString = name.split("_")[0];
-        return new Type(typeString);
+        return new CommentType(typeString);
     }
     private Types translateToEnum(String typeString) {
         Types t;

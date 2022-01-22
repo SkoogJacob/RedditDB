@@ -1,7 +1,7 @@
 package comments;
 
 import com.squareup.moshi.Json;
-import db_accessors.Type;
+import db_accessors.CommentType;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -27,10 +27,10 @@ public record FullComment(String id, String name, String author,
     public LocalDate getDateCreated() {
         return Instant.ofEpochSecond(createdUTC).atZone(ZoneId.systemDefault()).toLocalDate();
     }
-    public Type getCommentType() {
-        return Type.fromCommentName(this.name);
+    public CommentType getCommentType() {
+        return CommentType.fromCommentName(this.name);
     }
-    public Type getParentType() {
-        return Type.fromCommentName(this.parentID);
+    public CommentType getParentType() {
+        return CommentType.fromCommentName(this.parentID);
     }
 }
