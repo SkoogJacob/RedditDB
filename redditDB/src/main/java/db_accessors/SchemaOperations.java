@@ -2,6 +2,9 @@ package db_accessors;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.regex.Pattern;
 
 public class SchemaOperations {
@@ -12,9 +15,15 @@ public class SchemaOperations {
      * @param schemaName The desired name of the schema.
      * @return An SQL string to create a schema with the desired name.
      */
-    public static String createSchema(@NotNull String schemaName) {
+    public static boolean createSchema(@NotNull Connection conn, @NotNull String schemaName) {
         assertValidSchemaName(schemaName);
-        return "CREATE SCHEMA " + schemaName + " COLLATE utf8mb4_unicode_ci;";
+        try {
+            conn.createStatement().execute("CREATE SCHEMA %1$s COLLATE utf8mb4_unicode_ci;".formatted(schemaName));
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -23,9 +32,15 @@ public class SchemaOperations {
      * @param schemaName The name of the schema to delete.
      * @return A sql query string to delete the desired schema.
      */
-    public static String dropSchema(@NotNull String schemaName) {
+    public static boolean dropSchema(@NotNull Connection conn, @NotNull String schemaName) {
         assertValidSchemaName(schemaName);
-        return "DROP SCHEMA " + schemaName + ";";
+        try {
+            conn.createStatement().execute("DROP SCHEMA %1$s;".formatted(schemaName));
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
