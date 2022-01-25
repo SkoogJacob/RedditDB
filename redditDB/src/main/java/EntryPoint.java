@@ -1,19 +1,16 @@
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import comments.FullComment;
 import file_readers.RedditJSONExtractor;
 import io.github.cdimascio.dotenv.Dotenv;
-import comments.FullComment;
-import org.mariadb.jdbc.client.DataType;
 
-import java.io.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.*;
 import java.util.LinkedList;
 
 public class EntryPoint {
-    public static void main(String[] args) throws SQLException, IOException {
-        System.out.println(DataType.ENUM);
+    public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException {
         try {
             Moshi moshi = new Moshi.Builder().build();
             JsonAdapter<FullComment> adapter = moshi.adapter(FullComment.class);
@@ -29,24 +26,15 @@ public class EntryPoint {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-        Dotenv dotenv = Dotenv.load();
-        File smallFile = new File(args[0]);
-        try (Connection conn =
-                     DriverManager.getConnection(dotenv.get("SQL_URL"),
-                             dotenv.get("SQL_UNAME"),
-                             dotenv.get("SQL_PWORD"))
-        ) {
-            conn.setCatalog("reddit_db");
-//            try (Statement stmt = conn.createStatement()) {
-//                try (ResultSet rs = stmt.executeQuery("SELECT ID FROM classes")) {
-//                    rs.first();
-//                    System.out.println(rs.getString(1));
-//                    while (rs.next()) {
-//                        System.out.println(rs.getString(1));
-//                    }
-//                }
-//            }
+        Dotenv env = Dotenv.load();
+        try (Connection conn = DriverManager.getConnection(
+                env.get("SQL_URL"),
+                env.get("SQL_UNAME"),
+                env.get("SQL_PWORD")
+        )) {
+            final String schemaName = "test_db";
+            conn.setCatalog(schemaName);
         }
+
     }
 }
