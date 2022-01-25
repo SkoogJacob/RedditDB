@@ -1,6 +1,7 @@
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import comments.FullComment;
+import db_accessors.SQLTableManager;
 import file_readers.RedditJSONExtractor;
 import io.github.cdimascio.dotenv.Dotenv;
 
@@ -33,7 +34,9 @@ public class EntryPoint {
                 env.get("SQL_PWORD")
         )) {
             final String schemaName = "test_db";
-            conn.setCatalog(schemaName);
+            SQLTableManager.createConstrainedTables(conn, schemaName);
+            SQLTableManager.createUnconstrainedTables(conn, schemaName);
+            SQLTableManager.dropTables(conn, schemaName);
         }
 
     }

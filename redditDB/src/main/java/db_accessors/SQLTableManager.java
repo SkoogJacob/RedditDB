@@ -10,7 +10,7 @@ import java.sql.Statement;
  * This class contains static methods that take a connection object and target schema name and then creates
  * various tables used in this assignment.
  */
-public class SQLTableCreator {
+public class SQLTableManager {
 
     /**
      * Creates all the tables for reddit comments with various constraints to ensure sane values.
@@ -80,13 +80,13 @@ public class SQLTableCreator {
                 CREATE TABLE %1$s.%2$s
                 (
                     id              VARCHAR(10)                                 NOT NULL,
-                    parent_id       VARCHAR(10)                                 NULL,
+                    parent_id       VARCHAR(10)                                 NOT NULL,
                     link_id         VARCHAR(10)                                 NOT NULL,
                     type            ENUM ('t1', 't2', 't3', 't4', 't5', 't6')   NOT NULL,
                     author          VARCHAR(20) default '[deleted]'             NOT NULL,
                     body            TEXT        default '[deleted]'             NOT NULL,
                     subreddit_id    VARCHAR(10)                                 NOT NULL,
-                    score           INT                                         NULL,
+                    score           INT                                         NOT NULL,
                     created_utc     INT                                         NOT NULL,
                     CONSTRAINT %3$s_pk PRIMARY KEY (id),
                     CONSTRAINT %3$s___fk_author_exists
@@ -98,7 +98,7 @@ public class SQLTableCreator {
                 );
                 """.formatted(targetSchema, redditComments, redditCommentsShort, redditUsers, subreddits).trim());
         statement.addBatch("""
-            CREATE UNIQUE INDEX IF NOT EXISTS %3$s_id_uindex ON %1$s.%2$s ("id");
+            CREATE UNIQUE INDEX IF NOT EXISTS %3$s_id_uindex ON %1$s.%2$s (id);
             """.formatted(targetSchema, redditComments, redditCommentsShort).trim());
         statement.executeBatch();
     }
@@ -152,4 +152,36 @@ public class SQLTableCreator {
         statement.executeBatch();
     }
 
+    public static boolean dropTables(Connection conn, String targetSchema) {
+        try {
+            dropTablesPrivate(conn, targetSchema);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    private static void dropTablesPrivate(Connection conn, String targetSchema) throws SQLException {
+        Statement statement = conn.createStatement();
+        statement.addBatch("""
+            DROP TABLE IF EXISTS %1$s.reddit_comments_constrained;
+            """.formatted(targetSchema));
+        statement.addBatch("""
+            DROP TABLE IF EXISTS %1$s.reddit_users_constrained;
+            """.formatted(targetSchema));
+        statement.addBatch("""
+            DROP TABLE IF EXISTS %1$s.subreddits_constrained;
+            """.formatted(targetSchema));
+
+        statement.addBatch("""
+            DROP TABLE IF EXISTS %1$s.reddit_comments_unconstrained;
+            """.formatted(targetSchema));
+        statement.addBatch("""
+            DROP TABLE IF EXISTS %1$s.reddit_users_unconstrained;
+            """.formatted(targetSchema));
+        statement.addBatch("""
+            DROP TABLE IF EXISTS %1$s.subreddits_unconstrained;
+            """.formatted(targetSchema));
+        statement.executeBatch();
+    }
 }
