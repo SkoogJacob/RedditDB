@@ -41,7 +41,8 @@ public class RedditJSONExtractor {
      * It then loads the result into this.next, or it sets next to the empty string
      * if no next object was found.
      */
-    private void loadNextJSON() {
+    @Deprecated
+    private void loadNextJSONOLD() {
         if (!scanner.hasNext()) {
             next = "";
             return;
@@ -61,6 +62,19 @@ public class RedditJSONExtractor {
         } else {
             next = "{" + retVal + "}";
         }
+    }
+
+    /**
+     * Loads the next JSON object from the reader if there are more JSON objects.
+     * It then loads the result into this.next, or it sets next to the empty string
+     * if no next object was found.
+     */
+    private void loadNextJSON() {
+        if (!scanner.hasNext()) {
+            next = "";
+            return;
+        }
+        next = scanner.nextLine();
     }
 
     /**
