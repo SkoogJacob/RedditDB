@@ -72,6 +72,7 @@ public class RedditJSONExtractor {
         if (!hasNext()) throw new NoSuchElementException("There are no more JSON objects!");
         String retVal = next;
         loadNextJSON();
+        System.out.println(retVal);
         return retVal;
     }
 
