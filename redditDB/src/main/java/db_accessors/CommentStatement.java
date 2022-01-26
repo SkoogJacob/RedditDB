@@ -28,4 +28,8 @@ public class CommentStatement {
     public int[] executeBatch() throws SQLException {
         return statement.executeBatch();
     }
+
+    public void close() throws SQLException {
+        statement.close();
+    }
 }

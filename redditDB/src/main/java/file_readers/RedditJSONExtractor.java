@@ -40,6 +40,8 @@ public class RedditJSONExtractor {
      * Loads the next JSON object from the reader if there are more JSON objects.
      * It then loads the result into this.next, or it sets next to the empty string
      * if no next object was found.
+     *
+     * Saving just in case, although I think this will be deleted soon.
      */
     @Deprecated
     private void loadNextJSONOLD() {
