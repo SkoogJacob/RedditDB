@@ -42,7 +42,13 @@ public class EntryPoint {
                     list.toArray(comments);
                     list.clear();
                     Runnable loader = constrained ? new DBLoaderConstrained(params, schemaName, comments) : null;
-                    new Thread(loader).start();
+                    Thread t = new Thread(loader);
+                    t.start();
+                    try {
+                        t.join(); // Weird collisions happen with multithreading, putting this join here (making multithreading entirely pointless) until I know why
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         } catch (FileNotFoundException e) {
