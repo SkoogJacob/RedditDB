@@ -11,12 +11,12 @@ import java.util.Scanner;
  * This class reads the Reddit data files.
  *
  * The files data are written as
- * ```{
- *     JSONDATA
- * } {
- *     JSONDATA
- * } ...etc
- * ```
+ * <p>
+ * {JSONDATA} <br />
+ * {JSONDATA}  <br />
+ * {JSONDATA}  <br />
+ * ...etc
+ * </p>
  * This class' task is to extract the valid JSON objects, so they can be parsed by a
  * JSON parser.
  */
@@ -32,7 +32,7 @@ public class RedditJSONExtractor {
     public RedditJSONExtractor(String filepath) throws FileNotFoundException {
         reader = new BufferedReader(new FileReader(filepath));
         scanner = new Scanner(reader);
-        scanner.useDelimiter("[{}]");
+//        scanner.useDelimiter("[{}]");
         loadNextJSON();
     }
 
@@ -88,7 +88,6 @@ public class RedditJSONExtractor {
         if (!hasNext()) throw new NoSuchElementException("There are no more JSON objects!");
         String retVal = next;
         loadNextJSON();
-        System.out.println(retVal);
         return retVal;
     }
 

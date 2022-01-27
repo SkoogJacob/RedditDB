@@ -85,7 +85,7 @@ public class SQLTableManager {
                     type            ENUM ('t1', 't2', 't3', 't4', 't5', 't6')   NOT NULL,
                     author          VARCHAR(20) default '[deleted]'             NOT NULL,
                     body            TEXT        default '[deleted]'             NOT NULL,
-                    subreddit_id    VARCHAR(10)                                 NOT NULL,
+                    subreddit_id    VARCHAR(10) default 'deleted'               NOT NULL,
                     score           INT                                         NOT NULL,
                     created_utc     INT                                         NOT NULL,
                     CONSTRAINT %3$s_pk PRIMARY KEY (id),
@@ -94,7 +94,7 @@ public class SQLTableManager {
                         ON UPDATE CASCADE ON DELETE SET DEFAULT,
                     CONSTRAINT %3$s___fk_subreddit_exists
                         FOREIGN KEY (subreddit_id) REFERENCES %1$s.%5$s (subreddit_id)
-                        ON UPDATE CASCADE ON DELETE CASCADE
+                        ON UPDATE CASCADE ON DELETE SET DEFAULT
                 );
                 """.formatted(targetSchema, redditComments, redditCommentsShort, redditUsers, subreddits).trim());
         statement.addBatch("""
@@ -152,6 +152,27 @@ public class SQLTableManager {
         statement.executeBatch();
     }
 
+    public static boolean clearTables(Connection conn, String targetSchema) {
+        try {
+            clearTablesPrivate(conn, targetSchema);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    private static void clearTablesPrivate (Connection conn, String targetSchema) throws SQLException {
+        Statement statement = conn.createStatement();
+        statement.addBatch("DELETE FROM %1$s.subreddits_constrained;".formatted(targetSchema));
+        statement.addBatch("DELETE FROM %1$s.reddit_comments_constrained WHERE (subreddit_id) NOT IN ('deleted');".formatted(targetSchema));
+        statement.addBatch("DELETE FROM %1$s.reddit_users_constrained WHERE username NOT IN ('[deleted]');".formatted(targetSchema));
+        try {
+            statement.executeBatch();
+        } catch (SQLException ignore) {}
+        statement.addBatch("TRUNCATE TABLE %1$s.subreddits_unconstrained;".formatted(targetSchema));
+        statement.addBatch("TRUNCATE TABLE %1$s.reddit_comments_unconstrained;".formatted(targetSchema));
+        statement.addBatch("TRUNCATE TABLE %1$s.reddit_users_unconstrained;".formatted(targetSchema));
+    }
     public static boolean dropTables(Connection conn, String targetSchema) {
         try {
             dropTablesPrivate(conn, targetSchema);
