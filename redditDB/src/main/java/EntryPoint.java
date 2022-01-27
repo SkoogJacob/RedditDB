@@ -1,7 +1,7 @@
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import comments.FullComment;
-import db_accessors.*;
+import dbaccessors.*;
 import file_readers.RedditJSONExtractor;
 import io.github.cdimascio.dotenv.Dotenv;
 

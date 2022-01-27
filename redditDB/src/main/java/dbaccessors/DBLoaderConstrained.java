@@ -1,4 +1,4 @@
-package db_accessors;
+package dbaccessors;
 
 import comments.FullComment;
 import org.jetbrains.annotations.NotNull;

@@ -1,16 +1,17 @@
-package db_accessors;
-
-import org.jetbrains.annotations.NotNull;
+package dbaccessors;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * This class contains static methods that take a connection object and target schema name and then creates
+ * This class contains static methods that take a connection object
+ * and target schema name and then creates
  * various tables used in this assignment.
  */
-public class SQLTableManager {
+public final class SQLTableManager {
+    private SQLTableManager() { };
 
     /**
      * Creates all the tables for reddit comments with various constraints to ensure sane values.
@@ -19,7 +20,7 @@ public class SQLTableManager {
      * @param targetSchema The SQL schema to create the tables in.
      * @return true if all operations went without error, false otherwise.
      */
-    public static boolean createConstrainedTables(@NotNull Connection conn, @NotNull String targetSchema) {
+    public static boolean createConstrainedTables(@NotNull final Connection conn, @NotNull final String targetSchema) {
         try {
             createConstrainedTablesPrivate(conn, targetSchema);
             return true;
@@ -35,7 +36,7 @@ public class SQLTableManager {
      * @param targetSchema The schema to store the created tables in
      * @throws SQLException Throws any SQL exceptions that occur
      */
-    private static void createConstrainedTablesPrivate(@NotNull Connection conn, @NotNull String targetSchema) throws SQLException {
+    private static void createConstrainedTablesPrivate(@NotNull final Connection conn, @NotNull final String targetSchema) throws SQLException {
         final String redditUsers = "reddit_users_constrained";
         final String redditUsersShort = "ruc";
         final String subreddits = "subreddits_constrained";
@@ -103,7 +104,14 @@ public class SQLTableManager {
         statement.executeBatch();
     }
 
-    public static boolean createUnconstrainedTables(@NotNull Connection conn, @NotNull String targetSchema) {
+    /**
+     * Creates a table to contain all the reddit data, but with absolutely 0 rules. Not even primary keys.
+     *
+     * @param conn Connection to make requests on.
+     * @param targetSchema The schema to store the created tables in.
+     * @return True if no errors were thrown by the requests, false otherwise.
+     */
+    public static boolean createUnconstrainedTables(@NotNull final Connection conn, @NotNull final String targetSchema) {
         try {
             createUnconstrainedTablesPrivate(conn, targetSchema);
             return true;
@@ -112,7 +120,7 @@ public class SQLTableManager {
             return false;
         }
     }
-    private static void createUnconstrainedTablesPrivate(@NotNull Connection conn, @NotNull String targetSchema) throws SQLException {
+    private static void createUnconstrainedTablesPrivate(@NotNull final Connection conn, @NotNull final String targetSchema) throws SQLException {
         Statement statement = conn.createStatement();
         final String redditUsers = "reddit_users_unconstrained";
         final String subreddits = "subreddits_unconstrained";
@@ -152,7 +160,13 @@ public class SQLTableManager {
         statement.executeBatch();
     }
 
-    public static boolean clearTables(Connection conn, String targetSchema) {
+    /**
+     * Clears all entries from the reddit tables in the target schema.
+     * @param conn The connection to make requests with.
+     * @param targetSchema The schema containing the reddit data tables.
+     * @return true if no exceptions were thrown, false otherwise.
+     */
+    public static boolean clearTables(@NotNull final Connection conn, @NotNull final String targetSchema) {
         try {
             clearTablesPrivate(conn, targetSchema);
             return true;
@@ -161,19 +175,30 @@ public class SQLTableManager {
             return false;
         }
     }
-    private static void clearTablesPrivate (Connection conn, String targetSchema) throws SQLException {
+    private static void clearTablesPrivate(@NotNull final Connection conn, @NotNull final String targetSchema) throws SQLException {
         Statement statement = conn.createStatement();
         statement.addBatch("DELETE FROM %1$s.subreddits_constrained;".formatted(targetSchema));
         statement.addBatch("DELETE FROM %1$s.reddit_comments_constrained WHERE (subreddit_id) NOT IN ('deleted');".formatted(targetSchema));
         statement.addBatch("DELETE FROM %1$s.reddit_users_constrained WHERE username NOT IN ('[deleted]');".formatted(targetSchema));
         try {
             statement.executeBatch();
-        } catch (SQLException ignore) {}
+        } catch (SQLException ignore) { }
         statement.addBatch("TRUNCATE TABLE %1$s.subreddits_unconstrained;".formatted(targetSchema));
         statement.addBatch("TRUNCATE TABLE %1$s.reddit_comments_unconstrained;".formatted(targetSchema));
         statement.addBatch("TRUNCATE TABLE %1$s.reddit_users_unconstrained;".formatted(targetSchema));
+        try {
+            statement.executeBatch();
+        } catch (SQLException ignore) { }
+        statement.close();
     }
-    public static boolean dropTables(Connection conn, String targetSchema) {
+
+    /**
+     * Drops all the reddit tables that are in the target schema.
+     * @param conn The connection to make the requests from.
+     * @param targetSchema The schema to drop tables from.
+     * @return true if no exceptions, false otherwise
+     */
+    public static boolean dropTables(@NotNull final Connection conn, @NotNull final String targetSchema) {
         try {
             dropTablesPrivate(conn, targetSchema);
             return true;
@@ -182,7 +207,7 @@ public class SQLTableManager {
             return false;
         }
     }
-    private static void dropTablesPrivate(Connection conn, String targetSchema) throws SQLException {
+    private static void dropTablesPrivate(@NotNull final Connection conn, @NotNull final String targetSchema) throws SQLException {
         Statement statement = conn.createStatement();
         statement.addBatch("""
             DROP TABLE IF EXISTS %1$s.reddit_comments_constrained;
@@ -204,5 +229,6 @@ public class SQLTableManager {
             DROP TABLE IF EXISTS %1$s.subreddits_unconstrained;
             """.formatted(targetSchema));
         statement.executeBatch();
+        statement.close();
     }
 }

@@ -1,4 +1,4 @@
-package db_accessors;
+package dbaccessors;
 
 import comments.FullComment;
 import org.jetbrains.annotations.NotNull;
@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.TreeSet;
 
 public class DBLoaderUnconstrained implements Runnable {
     @NotNull private final Connection conn;

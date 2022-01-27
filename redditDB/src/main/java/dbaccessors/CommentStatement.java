@@ -1,4 +1,4 @@
-package db_accessors;
+package dbaccessors;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

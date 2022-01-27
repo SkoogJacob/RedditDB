@@ -1,10 +1,9 @@
-package db_accessors;
+package dbaccessors;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.regex.Pattern;
 
 public class SchemaOperations {

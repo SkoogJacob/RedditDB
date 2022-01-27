@@ -1,8 +1,7 @@
-package db_accessors;
+package dbaccessors;
 
 import comments.FullComment;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class AddCommentBatch {
