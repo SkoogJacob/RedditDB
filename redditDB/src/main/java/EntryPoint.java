@@ -1,8 +1,8 @@
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import comments.FullComment;
-import dbaccessors.*;
-import filereaders.RedditJSONExtractor;
+import db.accessors.*;
+import files.readers.RedditJSONExtractor;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.FileNotFoundException;

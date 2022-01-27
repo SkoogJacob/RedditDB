@@ -1,4 +1,4 @@
-package dbaccessors;
+package db.accessors;
 
 import java.sql.Connection;
 import java.sql.SQLException;

@@ -1,7 +1,7 @@
 package comments;
 
 import com.squareup.moshi.Json;
-import dbaccessors.CommentType;
+import db.accessors.CommentType;
 
 import java.time.Instant;
 import java.time.LocalDate;

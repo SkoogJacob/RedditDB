@@ -1,4 +1,4 @@
-package dbaccessors;
+package db.accessors;
 
 import org.jetbrains.annotations.NotNull;
 
