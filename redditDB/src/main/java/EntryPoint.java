@@ -30,25 +30,25 @@ public class EntryPoint {
             LinkedList<FullComment> list = new LinkedList<>();
             // Reading JSON from the file. If 1000 objects have been read in,
             int batchSize = constrained ? 10000 : 1000; // Constrained can have larger batches as it is only processing one batch at a time
+            LinkedList<Thread> threads = new LinkedList<>();
             while (extractor.hasNext()) {
                 String json = extractor.extractJSONObject();
                 list.add(adapter.fromJson(json));
-                if (list.size() == 1000 || !extractor.hasNext()) {
+                if (list.size() == batchSize || !extractor.hasNext()) {
                     FullComment[] comments = new FullComment[list.size()];
                     list.toArray(comments);
                     list.clear();
                     Runnable loader = constrained ? new DBLoaderConstrained(params, schemaName, comments) : new DBLoaderUnconstrained(params, schemaName, comments);
-                    Thread t = new Thread(loader);
-                    t.start();
                     if (constrained) {
-                        try {
-                            t.join(); // Weird collisions happen with multithreading, putting this join here (making multithreading entirely pointless) until I know why
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        loader.run();
+                    } else {
+                        Thread t = new Thread(loader);
+                        t.start();
+                        threads.add(t);
                     }
                 }
             }
+            for (Thread t : threads) try { t.join(); } catch (InterruptedException ignore) { }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

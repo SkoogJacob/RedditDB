@@ -150,8 +150,8 @@ public final class SQLTableManager {
                     parent_id       VARCHAR(10)                                 NULL,
                     link_id         VARCHAR(10)                                 NULL,
                     type            ENUM ('t1', 't2', 't3', 't4', 't5', 't6')   NULL,
-                    author          VARCHAR(20) default '[deleted]'             NULL,
-                    body            TEXT        default '[deleted]'             NULL,
+                    author          VARCHAR(20)                                 NULL,
+                    body            TEXT                                        NULL,
                     subreddit_id    VARCHAR(10)                                 NULL,
                     score           INT                                         NULL,
                     created_utc     INT                                         NULL
