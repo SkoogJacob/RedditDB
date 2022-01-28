@@ -13,12 +13,40 @@ public class CommentStatement {
         );
     }
 
-    public void setString(int parameterIndex, String value) throws SQLException {
-        statement.setString(parameterIndex, value);
+    public void setID(String value) throws SQLException {
+        statement.setString(1, value);
     }
 
-    public void setInt(int parameterIndex, int value) throws SQLException {
-        statement.setInt(parameterIndex, value);
+    public void setParentID(String value) throws SQLException {
+        statement.setString(2, value);
+    }
+
+    public void setLinkID(String value) throws SQLException {
+        statement.setString(3, value);
+    }
+
+    public void setType(String value) throws SQLException {
+        statement.setString(4, value);
+    }
+
+    public void setAuthor(String value) throws SQLException {
+        statement.setString(5, value);
+    }
+
+    public void setBody(String value) throws SQLException {
+        statement.setString(6, value);
+    }
+
+    public void setSubredditID(String value) throws SQLException {
+        statement.setString(7, value);
+    }
+
+    public void setScore(int value) throws SQLException {
+        statement.setInt(8, value);
+    }
+
+    public void setCreatedUTC(int value) throws SQLException {
+        statement.setInt(9, value);
     }
 
     public void addBatch() throws SQLException {

@@ -6,13 +6,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
-public class SchemaOperations {
+public final class SchemaOperations {
+    private SchemaOperations() { }
     /**
      * Returns the SQL query to create a schema with the passed schema name
      * and utf8mb4_unicode_ci collation.
      *
      * @param schemaName The desired name of the schema.
-     * @return An SQL string to create a schema with the desired name.
+     * @return True if no SQL exceptions were thrown, false otherwise.
      */
     public static boolean createSchema(@NotNull Connection conn, @NotNull String schemaName) {
         assertValidSchemaName(schemaName);
@@ -29,7 +30,7 @@ public class SchemaOperations {
      * Returns an SQL query string to drop (delete) a schema with the passed schema name.
      *
      * @param schemaName The name of the schema to delete.
-     * @return A sql query string to delete the desired schema.
+     * @return True if no SQL exceptions were thrown, false otherwise.
      */
     public static boolean dropSchema(@NotNull Connection conn, @NotNull String schemaName) {
         assertValidSchemaName(schemaName);
