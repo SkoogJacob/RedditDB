@@ -6,9 +6,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class MarkDownWriter {
+    private File targetFile;
+    public MarkDownWriter(File target) {
+        assert target.isFile();
+        targetFile = target;
+    }
+
     /**
      * <p>
-     * Writes the passed results to results.md in the current directory.
+     * Writes the passed results to the target file stored in this.
      * Expects a markdown formatted string.
      * </p>
      * <p>
@@ -19,10 +25,12 @@ public class MarkDownWriter {
      * @param toWrite The text to append to the file.
      * @throws IOException If there was en error in creating or writing to the file.
      */
-    public static void writeToFile(String toWrite) throws IOException {
-        writeToFilePrivate(toWrite, "./results.md");
+    public void writeToFile(String toWrite) throws IOException {
+        FileWriter writer = new FileWriter(targetFile, true);
+        BufferedWriter buff = new BufferedWriter(writer);
+        buff.write(toWrite);
+        buff.close();
     }
-
     /**
      * <p>
      *     Writes the String in the passed <b>'toWrite'</b> parameter to the file specified by the

@@ -21,6 +21,9 @@ public class EntryPoint {
         );
         String srcFile = args[0];
         assert srcFile != null && !srcFile.equals("");
+        String resultFile = args[1];
+        assert resultFile != null && !resultFile.equals("");
         Tester tester = new Tester(params, srcFile, "test_db");
+
     }
 }
