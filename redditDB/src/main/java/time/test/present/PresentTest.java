@@ -10,7 +10,7 @@ public final class PresentTest {
      */
     public static String testPrint(Test test) {
         String typeString;
-        float seconds = test.timeTakenMicroseconds() / 1000000f;
+        float seconds = test.timeTakenNanoseconds() / 1000000000f;
         switch (test.testType()) {
             case UNCONSTRAINED -> typeString = "Test with unconstrained tables";
             case CONSTRAINED -> typeString = "Test with constrained tables";
@@ -21,8 +21,8 @@ public final class PresentTest {
 """
 ## %1$s
                 
-%2$d records were inserted in %3$d microseconds (%4$f seconds).
+%2$d records were inserted in %3$d nanoseconds (%4$f seconds).
                 
-""".formatted(typeString, test.numberOfRecords(), test.timeTakenMicroseconds(), seconds);
+""".formatted(typeString, test.numberOfRecords(), test.timeTakenNanoseconds(), seconds);
     }
 }

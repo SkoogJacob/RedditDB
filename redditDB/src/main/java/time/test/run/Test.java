@@ -15,7 +15,7 @@ package time.test.run;
  * </p>
  *
  */
-public record Test(TestType testType, int timeTakenMicroseconds, int numberOfRecords) {
+public record Test(TestType testType, long timeTakenNanoseconds, int numberOfRecords) {
     public enum TestType {
         UNCONSTRAINED, CONSTRAINED, PRESTAGED
     }
