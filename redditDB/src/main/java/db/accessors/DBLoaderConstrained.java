@@ -61,13 +61,13 @@ public class DBLoaderConstrained implements Runnable {
 
             // Switching to inserting reddit usernames table
             statement = conn.prepareStatement(
-                    "INSERT INTO %1$s.reddit_users_constrained (username) VALUES (?);".formatted(targetSchema)
+                    "INSERT INTO %1$s.redditors_constrained (username) VALUES (?);".formatted(targetSchema)
             );
             for (FullComment comment : data) {
                 boolean contains = id.contains(comment.author());
                 if (
                         !contains && conn.createStatement().executeQuery(
-                        "SELECT * FROM %1$s.reddit_users_constrained WHERE username = '%2$s';".formatted(targetSchema, comment.author())
+                        "SELECT * FROM %1$s.redditors_constrained WHERE username = '%2$s';".formatted(targetSchema, comment.author())
                         ).first()
                 ) {
                     id.add(comment.author());
@@ -91,7 +91,7 @@ public class DBLoaderConstrained implements Runnable {
                 boolean contains = id.contains(comment.id());
                 if (
                         !contains && conn.createStatement().executeQuery(
-                                "SELECT * FROM %1$s.reddit_comments_constrained WHERE id = '%2$s';".formatted(targetSchema, comment.id())
+                                "SELECT * FROM %1$s.comments_constrained WHERE id = '%2$s';".formatted(targetSchema, comment.id())
                         ).first()
                 ) {
                     id.add(comment.id());

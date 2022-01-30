@@ -9,7 +9,7 @@ public class CommentStatement {
     public CommentStatement(Connection conn, String targetSchema, boolean constrained) throws SQLException {
         String affix = constrained ? "constrained" : "unconstrained";
         statement = conn.prepareStatement(
-                "INSERT INTO %1$s.reddit_comments_%2$s (id, parent_id, link_id, type, author, body, subreddit_id, score, created_utc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);".formatted(targetSchema, affix)
+                "INSERT INTO %1$s.comments_%2$s (id, parent_id, link_id, type, author, body, subreddit_id, score, created_utc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);".formatted(targetSchema, affix)
         );
     }
 

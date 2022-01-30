@@ -18,18 +18,21 @@ public class EntryPoint {
             RedditJSONExtractor extractor = new RedditJSONExtractor(args[0]);
             // Creating a base connection to the SQL DB
             final SQLAccessParams params = new SQLAccessParams(env.get("SQL_URL"), env.get("SQL_UNAME"), env.get("SQL_PWORD"));
-            final Connection conn = DriverManager.getConnection(params.url(), params.username(), params.password());
+            final Connection conn = params.getConnection();
             // Creating the schema and required tables if they don't exist
             final String schemaName = "test_db";
-            SchemaOperations.createSchema(conn, schemaName);
+//            SchemaOperations.createSchema(conn, schemaName);
             SQLTableManager.createUnconstrainedTables(conn, schemaName);
+            SQLTableManager.createConstrainedTables(conn, schemaName);
             boolean constrained = false;
             // Creating moshi adapter to read in JSON to FullComment objects
             Moshi moshi = new Moshi.Builder().build();
             JsonAdapter<FullComment> adapter = moshi.adapter(FullComment.class);
             LinkedList<FullComment> list = new LinkedList<>();
+
             // Reading JSON from the file. If 1000 objects have been read in,
             int batchSize = constrained ? 10000 : 1000; // Constrained can have larger batches as it is only processing one batch at a time
+            int coreCount = Runtime.getRuntime().availableProcessors();
             LinkedList<Thread> threads = new LinkedList<>();
             while (extractor.hasNext()) {
                 String json = extractor.extractJSONObject();
@@ -45,11 +48,17 @@ public class EntryPoint {
                         Thread t = new Thread(loader);
                         t.start();
                         threads.add(t);
+                        if (threads.size() == coreCount) {
+                            threads.getFirst().join();
+                            threads.removeFirst();
+                        }
                     }
                 }
             }
             for (Thread t : threads) try { t.join(); } catch (InterruptedException ignore) { }
-        } catch (FileNotFoundException e) {
+            LoadAfterStaging loader = new LoadAfterStaging(params, schemaName);
+            loader.load();
+        } catch (FileNotFoundException | InterruptedException e) {
             e.printStackTrace();
         }
 

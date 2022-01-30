@@ -37,12 +37,12 @@ public final class SQLTableManager {
      * @throws SQLException Throws any SQL exceptions that occur
      */
     private static void createConstrainedTablesPrivate(@NotNull final Connection conn, @NotNull final String targetSchema) throws SQLException {
-        final String redditUsers = "reddit_users_constrained";
-        final String redditUsersShort = "ruc";
+        final String redditUsers = "redditors_constrained";
+        final String redditUsersShort = "rc";
         final String subreddits = "subreddits_constrained";
         final String subredditsShort = "sc";
-        final String redditComments = "reddit_comments_constrained";
-        final String redditCommentsShort = "rcc";
+        final String redditComments = "comments_constrained";
+        final String redditCommentsShort = "cc";
 
         Statement statement = conn.createStatement();
         // Creating user table and inserting a default username '[deleted]'
@@ -73,9 +73,6 @@ public final class SQLTableManager {
         statement.addBatch("""
                 CREATE UNIQUE INDEX %3$s_subreddit_id_uindex ON %1$s.%2$s (subreddit_id);
                 """.formatted(targetSchema, subreddits, subredditsShort).trim());
-        statement.addBatch("""
-                CREATE UNIQUE INDEX %3$s_subreddit_name_uindex ON %1$s.%2$s (subreddit_name);
-                """.formatted(targetSchema, subreddits, subredditsShort).trim());
         // Creating comments table
         statement.addBatch("""
                 CREATE TABLE %1$s.%2$s
@@ -86,7 +83,7 @@ public final class SQLTableManager {
                     type            ENUM ('t1', 't2', 't3', 't4', 't5', 't6')   NOT NULL,
                     author          VARCHAR(20) default '[deleted]'             NOT NULL,
                     body            TEXT        default '[deleted]'             NOT NULL,
-                    subreddit_id    VARCHAR(10) default 'deleted'               NOT NULL,
+                    subreddit_id    VARCHAR(10)                                 NOT NULL,
                     score           INT                                         NOT NULL,
                     created_utc     INT                                         NOT NULL,
                     CONSTRAINT %3$s_pk PRIMARY KEY (id),
@@ -95,7 +92,7 @@ public final class SQLTableManager {
                         ON UPDATE CASCADE ON DELETE SET DEFAULT,
                     CONSTRAINT %3$s___fk_subreddit_exists
                         FOREIGN KEY (subreddit_id) REFERENCES %1$s.%5$s (subreddit_id)
-                        ON UPDATE CASCADE ON DELETE SET DEFAULT
+                        ON UPDATE CASCADE ON DELETE NO ACTION
                 );
                 """.formatted(targetSchema, redditComments, redditCommentsShort, redditUsers, subreddits).trim());
         statement.addBatch("""
@@ -122,9 +119,9 @@ public final class SQLTableManager {
     }
     private static void createUnconstrainedTablesPrivate(@NotNull final Connection conn, @NotNull final String targetSchema) throws SQLException {
         Statement statement = conn.createStatement();
-        final String redditUsers = "reddit_users_unconstrained";
+        final String redditUsers = "redditors_unconstrained";
         final String subreddits = "subreddits_unconstrained";
-        final String redditComments = "reddit_comments_unconstrained";
+        final String redditComments = "comments_unconstrained";
 
         // Creating user table and inserting a default username '[deleted]'
         statement.addBatch("""
@@ -162,6 +159,7 @@ public final class SQLTableManager {
 
     /**
      * Clears all entries from the reddit tables in the target schema.
+     *
      * @param conn The connection to make requests with.
      * @param targetSchema The schema containing the reddit data tables.
      * @return true if no exceptions were thrown, false otherwise.

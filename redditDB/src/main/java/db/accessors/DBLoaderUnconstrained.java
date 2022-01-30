@@ -36,7 +36,7 @@ public class DBLoaderUnconstrained implements Runnable {
                     "INSERT INTO %1$s.subreddits_unconstrained (subreddit_id, subreddit_name) VALUES (?, ?);".formatted(targetSchema)
             );
             PreparedStatement userStatement = conn.prepareStatement(
-                    "INSERT INTO %1$s.reddit_users_unconstrained (username) VALUES (?);".formatted(targetSchema)
+                    "INSERT INTO %1$s.redditors_unconstrained (username) VALUES (?);".formatted(targetSchema)
             );
             CommentStatement commentStatement = new CommentStatement(conn, targetSchema, false);
             for (FullComment comment : data) {
@@ -60,6 +60,10 @@ public class DBLoaderUnconstrained implements Runnable {
                 commentStatement.executeBatch();
             } catch (SQLException e) { e.printStackTrace(); }
 
+            userStatement.close();
+            subredditStatement.close();
+            commentStatement.close();
+            this.conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
