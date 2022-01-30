@@ -8,7 +8,7 @@ public final class PresentTest {
      * @param test The test to print
      * @return A markdown string presenting test results.
      */
-    public static String testPrint(Test test) {
+    public static String testPrint(Test test, String testNumber) {
         String typeString;
         float seconds = test.timeTakenNanoseconds() / 1000000000f;
         switch (test.testType()) {
@@ -17,6 +17,7 @@ public final class PresentTest {
             case PRESTAGED -> typeString = "Test using staging to unconstrained tables";
             default -> typeString = "Impossible!";
         }
+        typeString += " " + testNumber;
         return
 """
 ## %1$s
