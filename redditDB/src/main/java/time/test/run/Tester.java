@@ -48,7 +48,7 @@ public final class Tester {
         long startTime = System.nanoTime();
         loadTables(true, extractor, adapter, coreCount);
         long totalTime = System.nanoTime() - startTime;
-        String tableName = schema + "comments_unconstrained";
+        String tableName = schema + ".comments_unconstrained";
         return collateResult(totalTime, tableName, Test.TestType.UNCONSTRAINED);
     }
 

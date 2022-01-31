@@ -16,12 +16,12 @@ public final class SQLTableManager {
     /**
      * Creates all the tables for reddit comments with various constraints to ensure sane values.
      *
-     * @param conn The SQL connection to use in creating Statements
+     * @param params Access parameters to create a SQL connection from.
      * @param targetSchema The SQL schema to create the tables in.
      * @return true if all operations went without error, false otherwise.
      */
-    public static boolean createConstrainedTables(@NotNull final Connection conn, @NotNull final String targetSchema) {
-        try {
+    public static boolean createConstrainedTables(@NotNull final SQLAccessParams params, @NotNull final String targetSchema) {
+        try (Connection conn = params.getConnection()) {
             createConstrainedTablesPrivate(conn, targetSchema);
             return true;
         } catch (SQLException e) {
@@ -108,8 +108,8 @@ public final class SQLTableManager {
      * @param targetSchema The schema to store the created tables in.
      * @return True if no errors were thrown by the requests, false otherwise.
      */
-    public static boolean createUnconstrainedTables(@NotNull final Connection conn, @NotNull final String targetSchema) {
-        try {
+    public static boolean createUnconstrainedTables(@NotNull final SQLAccessParams params, @NotNull final String targetSchema) {
+        try (Connection conn = params.getConnection()){
             createUnconstrainedTablesPrivate(conn, targetSchema);
             return true;
         } catch (SQLException e) {
@@ -160,12 +160,12 @@ public final class SQLTableManager {
     /**
      * Clears all entries from the reddit tables in the target schema.
      *
-     * @param conn The connection to make requests with.
+     * @param params The params to establish sql connection.
      * @param targetSchema The schema containing the reddit data tables.
      * @return true if no exceptions were thrown, false otherwise.
      */
-    public static boolean clearTables(@NotNull final Connection conn, @NotNull final String targetSchema) {
-        try {
+    public static boolean clearTables(@NotNull final SQLAccessParams params, @NotNull final String targetSchema) {
+        try (Connection conn = params.getConnection()) {
             clearTablesPrivate(conn, targetSchema);
             return true;
         } catch (SQLException e) {
@@ -192,12 +192,12 @@ public final class SQLTableManager {
 
     /**
      * Drops all the reddit tables that are in the target schema.
-     * @param conn The connection to make the requests from.
+     * @param params SQL access credentials
      * @param targetSchema The schema to drop tables from.
      * @return true if no exceptions, false otherwise
      */
-    public static boolean dropTables(@NotNull final Connection conn, @NotNull final String targetSchema) {
-        try {
+    public static boolean dropTables(@NotNull final SQLAccessParams params, @NotNull final String targetSchema) {
+        try (Connection conn = params.getConnection()){
             dropTablesPrivate(conn, targetSchema);
             return true;
         } catch (SQLException e) {

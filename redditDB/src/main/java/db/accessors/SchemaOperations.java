@@ -15,15 +15,16 @@ public final class SchemaOperations {
      * @param schemaName The desired name of the schema.
      * @return True if no SQL exceptions were thrown, false otherwise.
      */
-    public static boolean createSchema(@NotNull Connection conn, @NotNull String schemaName) {
+    public static boolean createSchema(@NotNull SQLAccessParams params, @NotNull String schemaName) {
         assertValidSchemaName(schemaName);
-        try {
+        boolean noException = false;
+        try (Connection conn = params.getConnection()) {
             conn.createStatement().execute("CREATE SCHEMA %1$s COLLATE utf8mb4_unicode_ci;".formatted(schemaName));
-            return true;
+            noException = true;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return noException;
     }
 
     /**
@@ -32,9 +33,9 @@ public final class SchemaOperations {
      * @param schemaName The name of the schema to delete.
      * @return True if no SQL exceptions were thrown, false otherwise.
      */
-    public static boolean dropSchema(@NotNull Connection conn, @NotNull String schemaName) {
+    public static boolean dropSchema(@NotNull SQLAccessParams params, @NotNull String schemaName) {
         assertValidSchemaName(schemaName);
-        try {
+        try (Connection conn = params.getConnection()) {
             conn.createStatement().execute("DROP SCHEMA %1$s;".formatted(schemaName));
             return true;
         } catch (SQLException e) {

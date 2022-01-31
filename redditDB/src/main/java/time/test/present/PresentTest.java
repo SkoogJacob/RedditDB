@@ -6,9 +6,10 @@ public final class PresentTest {
     /**
      * Prints the results of a test in markdown format.
      * @param test The test to print
+     * @param testNumber The number of the test
      * @return A markdown string presenting test results.
      */
-    public static String testPrint(Test test, String testNumber) {
+    public static String getTestString(Test test, int testNumber) {
         String typeString;
         float seconds = test.timeTakenNanoseconds() / 1000000000f;
         switch (test.testType()) {
