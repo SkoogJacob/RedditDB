@@ -29,6 +29,16 @@ public final class Tester {
         this.moshi = new Moshi.Builder().build();
         assert this.srcFile.isFile();
     }
+
+    public Test run(Test.TestType type) throws SQLException, IOException, InterruptedException {
+        Test ret = null;
+        switch (type) {
+            case UNCONSTRAINED -> ret = unconstrainedTest();
+            case CONSTRAINED -> ret = constrainedTest();
+            case PRESTAGED -> ret = stagingTest();
+        }
+        return ret;
+    }
     public Test unconstrainedTest() throws IOException, SQLException, InterruptedException {
         final int coreCount = Runtime.getRuntime().availableProcessors();
         RedditJSONExtractor extractor = new RedditJSONExtractor(srcFile.getAbsolutePath());
@@ -111,4 +121,5 @@ public final class Tester {
 
         return test;
     }
+
 }
