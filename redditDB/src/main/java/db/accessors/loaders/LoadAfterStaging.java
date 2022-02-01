@@ -1,6 +1,7 @@
-package db.accessors;
+package db.accessors.loaders;
 
 import comments.FullComment;
+import db.accessors.SQLAccessParams;
 
 import java.sql.Connection;
 import java.sql.SQLException;

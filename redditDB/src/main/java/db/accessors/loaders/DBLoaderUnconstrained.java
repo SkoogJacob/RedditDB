@@ -1,6 +1,9 @@
-package db.accessors;
+package db.accessors.loaders;
 
 import comments.FullComment;
+import db.accessors.AddCommentBatch;
+import db.accessors.CommentStatement;
+import db.accessors.SQLAccessParams;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;

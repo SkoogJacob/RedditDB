@@ -104,7 +104,7 @@ public final class SQLTableManager {
     /**
      * Creates a table to contain all the reddit data, but with absolutely 0 rules. Not even primary keys.
      *
-     * @param conn Connection to make requests on.
+     * @param params SQL parameters to create a SQL Connection.
      * @param targetSchema The schema to store the created tables in.
      * @return True if no errors were thrown by the requests, false otherwise.
      */
@@ -175,15 +175,15 @@ public final class SQLTableManager {
     }
     private static void clearTablesPrivate(@NotNull final Connection conn, @NotNull final String targetSchema) throws SQLException {
         Statement statement = conn.createStatement();
+        statement.addBatch("DELETE FROM %1$s.comments_constrained WHERE (subreddit_id) NOT IN ('deleted');".formatted(targetSchema));
         statement.addBatch("DELETE FROM %1$s.subreddits_constrained;".formatted(targetSchema));
-        statement.addBatch("DELETE FROM %1$s.reddit_comments_constrained WHERE (subreddit_id) NOT IN ('deleted');".formatted(targetSchema));
-        statement.addBatch("DELETE FROM %1$s.reddit_users_constrained WHERE username NOT IN ('[deleted]');".formatted(targetSchema));
+        statement.addBatch("DELETE FROM %1$s.redditors_constrained WHERE username NOT IN ('[deleted]');".formatted(targetSchema));
         try {
             statement.executeBatch();
         } catch (SQLException ignore) { }
         statement.addBatch("TRUNCATE TABLE %1$s.subreddits_unconstrained;".formatted(targetSchema));
-        statement.addBatch("TRUNCATE TABLE %1$s.reddit_comments_unconstrained;".formatted(targetSchema));
-        statement.addBatch("TRUNCATE TABLE %1$s.reddit_users_unconstrained;".formatted(targetSchema));
+        statement.addBatch("TRUNCATE TABLE %1$s.comments_unconstrained;".formatted(targetSchema));
+        statement.addBatch("TRUNCATE TABLE %1$s.redditors_unconstrained;".formatted(targetSchema));
         try {
             statement.executeBatch();
         } catch (SQLException ignore) { }

@@ -7,7 +7,13 @@ import java.io.IOException;
 
 public class MarkDownWriter {
     private File targetFile;
-    public MarkDownWriter(File target) {
+    public MarkDownWriter(File target) throws IOException {
+        if (target.createNewFile()) {
+            FileWriter writer = new FileWriter(target.getCanonicalFile(), false);
+            BufferedWriter buff = new BufferedWriter(writer);
+            buff.write("# Reddit DB Write Testing\n");
+            buff.close();
+        }
         assert target.isFile();
         targetFile = target;
     }
