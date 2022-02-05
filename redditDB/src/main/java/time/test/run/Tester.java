@@ -11,25 +11,58 @@ import files.readers.RedditJSONExtractor;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
+import java.util.List;
 
 public final class Tester {
     private final SQLAccessParams params;
     private final File srcFile;
+    private final List<File> srcFiles;
     private final String schema;
     private final Moshi moshi;
+    private final JsonAdapter<FullComment> adapter;
 
+    /**
+     * Creates a tester object loading data from only one file.
+     *
+     * @param params Contains url, username, and password to create connection to SQL server.
+     * @param srcFile The file containing the data to load into the SQL file.
+     * @param targetSchema The target schema in the database to store the tables and data.
+     */
     public Tester(@NotNull SQLAccessParams params, String srcFile, String targetSchema) {
         this.params = params;
         this.srcFile = new File(srcFile);
+        this.srcFiles = null;
         this.schema = targetSchema;
         this.moshi = new Moshi.Builder().build();
+        this.adapter = this.moshi.adapter(FullComment.class);
         assert this.srcFile.isFile();
+    }
+
+    /**
+     * Creates a tester object that loads data from multiple files.
+     *
+     * @param params Contains url, username, and password to create connection to SQL server.
+     * @param srcFiles The files containing the data to load into the SQL file.
+     * @param targetSchema The target schema in the database to store the tables and data.
+     */
+    public Tester(@NotNull SQLAccessParams params, List<String> srcFiles, String targetSchema) {
+        this.params = params;
+        this.srcFile = null;
+        this.srcFiles = new LinkedList<>();
+        for (String src : srcFiles) {
+            this.srcFiles.add(new File(src));
+        }
+        this.schema = targetSchema;
+        this.moshi = new Moshi.Builder().build();
+        this.adapter = this.moshi.adapter(FullComment.class);
+        for (File src : this.srcFiles) assert src.isFile();
     }
 
     public Test run(Test.TestType type) throws SQLException, IOException, InterruptedException {
@@ -43,9 +76,7 @@ public final class Tester {
     }
     public Test unconstrainedTest() throws IOException, SQLException, InterruptedException {
         final int coreCount = Runtime.getRuntime().availableProcessors();
-        RedditJSONExtractor extractor = new RedditJSONExtractor(srcFile.getAbsolutePath());
-        Moshi moshi = new Moshi.Builder().build();
-        JsonAdapter<FullComment> adapter = moshi.adapter(FullComment.class);
+        RedditJSONExtractor extractor = getJSONExtractor();
 
         long startTime = System.nanoTime();
         loadTables(true, extractor, adapter, coreCount);
@@ -56,8 +87,7 @@ public final class Tester {
 
     public Test constrainedTest() throws IOException, SQLException, InterruptedException {
         final int batchSize = 15000;
-        RedditJSONExtractor extractor = new RedditJSONExtractor(srcFile.getAbsolutePath());
-        JsonAdapter<FullComment> adapter = moshi.adapter(FullComment.class);
+        RedditJSONExtractor extractor = getJSONExtractor();
 
         long startTime = System.nanoTime();
         loadTables(false, extractor, adapter, 1);
@@ -68,9 +98,7 @@ public final class Tester {
     }
     public Test stagingTest() throws IOException, SQLException, InterruptedException {
         final int coreCount = Runtime.getRuntime().availableProcessors();
-        RedditJSONExtractor extractor = new RedditJSONExtractor(srcFile.getAbsolutePath());
-        Moshi moshi = new Moshi.Builder().build();
-        JsonAdapter<FullComment> adapter = moshi.adapter(FullComment.class);
+        RedditJSONExtractor extractor = getJSONExtractor();
 
         long startTime = System.nanoTime();
         loadTables(true, extractor, adapter, coreCount);
@@ -122,6 +150,18 @@ public final class Tester {
         result.close();statement.close();conn.close(); // Closing all SQL resources opened here.
 
         return test;
+    }
+
+    private RedditJSONExtractor getJSONExtractor() throws FileNotFoundException {
+        RedditJSONExtractor extractor;
+        if (this.srcFiles == null) {
+            extractor = new RedditJSONExtractor(this.srcFile.getAbsolutePath());
+        } else {
+            List<String> srcPaths = new LinkedList<>();
+            for (File f : this.srcFiles) srcPaths.add(f.getAbsolutePath());
+            extractor = new RedditJSONExtractor(srcPaths);
+        }
+        return extractor;
     }
 
 }

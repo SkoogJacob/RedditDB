@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -21,8 +22,9 @@ import java.util.Scanner;
  * JSON parser.
  */
 public class RedditJSONExtractor {
+    private final List<String> filePaths;
     private final BufferedReader reader;
-    private final Scanner scanner;
+    private Scanner scanner;
     private String next;
     /**
      * Constructs a JSONExtractor that will read from the file at the given path.
@@ -30,10 +32,18 @@ public class RedditJSONExtractor {
      * @param filepath The path to the JSON file
      */
     public RedditJSONExtractor(String filepath) throws FileNotFoundException {
-        reader = new BufferedReader(new FileReader(filepath));
+        reader = getReader(filepath);
         scanner = new Scanner(reader);
+        filePaths = null;
 //        scanner.useDelimiter("[{}]");
         loadNextJSON();
+    }
+
+    public RedditJSONExtractor(List<String> filepaths) throws FileNotFoundException {
+        this.reader = getReader(filepaths.get(0));
+        scanner = new Scanner(reader);
+        filePaths = filepaths;
+        filePaths.remove(0);
     }
 
     /**
@@ -71,10 +81,13 @@ public class RedditJSONExtractor {
      * It then loads the result into this.next, or it sets next to the empty string
      * if no next object was found.
      */
-    private void loadNextJSON() {
-        if (!scanner.hasNext()) {
+    private void loadNextJSON() throws FileNotFoundException {
+        if (!scanner.hasNext() && (this.filePaths == null || this.filePaths.isEmpty())) {
             next = "";
             return;
+        } else if (!scanner.hasNext()) {
+            scanner = new Scanner(getReader(filePaths.get(0)));
+            filePaths.remove(0);
         }
         next = scanner.nextLine();
     }
@@ -84,7 +97,7 @@ public class RedditJSONExtractor {
      *
      * @return A JSON string if the reader had more objects in it, or null if eof is reached.
      */
-    public String extractJSONObject() {
+    public String extractJSONObject() throws FileNotFoundException {
         if (!hasNext()) throw new NoSuchElementException("There are no more JSON objects!");
         String retVal = next;
         loadNextJSON();
@@ -93,5 +106,9 @@ public class RedditJSONExtractor {
 
     public boolean hasNext() {
         return !next.equals("");
+    }
+
+    private BufferedReader getReader(String path) throws FileNotFoundException {
+        return new BufferedReader(new FileReader(path));
     }
 }
