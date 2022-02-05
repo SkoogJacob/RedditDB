@@ -39,10 +39,10 @@ public class RedditJSONExtractor {
         loadNextJSON();
     }
 
-    public RedditJSONExtractor(List<String> filepaths) throws FileNotFoundException {
-        this.reader = getReader(filepaths.get(0));
+    public RedditJSONExtractor(List<String> filePaths) throws FileNotFoundException {
+        this.reader = getReader(filePaths.get(0));
         this.scanner = new Scanner(reader);
-        this.filePaths = filepaths;
+        this.filePaths = filePaths;
         this.filePaths.remove(0);
     }
 
@@ -55,7 +55,8 @@ public class RedditJSONExtractor {
         if (!scanner.hasNext() && (this.filePaths == null || this.filePaths.isEmpty())) {
             next = "";
             return;
-        } else if (!scanner.hasNext()) {
+        }
+        while (!scanner.hasNext() && !this.filePaths.isEmpty()) {
             scanner.close();
             reader.close();
             scanner = new Scanner(getReader(filePaths.get(0)));
@@ -69,7 +70,7 @@ public class RedditJSONExtractor {
      *
      * @return A JSON string if the reader had more objects in it, or null if eof is reached.
      */
-    public String extractJSONObject() throws FileNotFoundException {
+    public String extractJSONObject() throws IOException {
         if (!hasNext()) throw new NoSuchElementException("There are no more JSON objects!");
         String retVal = next;
         loadNextJSON();
