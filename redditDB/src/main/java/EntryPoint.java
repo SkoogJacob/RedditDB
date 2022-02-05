@@ -33,6 +33,35 @@ public class EntryPoint {
         }
     }
 
+    private static FileSet parseArgs(String[] args) {
+        int argsLeft = args.length;
+        boolean testFlag = false;
+        String testFilePath = null;
+        List<String> srcFilePaths = new LinkedList<>();
+
+        for (String currArg : args) {
+            argsLeft--; // Argsleft denotes how many arguments are left after this loop.
+            if (testFlag && testFilePath == null) {
+                testFilePath = currArg;
+            }
+            testFlag = currArg.equals("--testOutput");
+
+            // Throwing errors if --testOutput has been passed twice or if it was passed as the final arg
+            if (testFlag && testFilePath != null) {
+                throw new IllegalArgumentException("--testOutput may only be specified once!");
+            } else if (testFlag && argsLeft == 0) {
+                throw new IllegalArgumentException("--testOutput requires an accompanying filepath");
+            }
+
+            if (!testFlag) srcFilePaths.add(currArg);
+        }
+        return new FileSet(testFilePath, srcFilePaths);
+    }
+
+    private record FileSet(String testFilePath, List<String> srcFilePaths) {
+    }
+
+
     /**
      * <p>This function will either load the database tables once for use in the assignment
      * or it will load it several times with different SQL methods to test performance.</p>
@@ -63,18 +92,17 @@ public class EntryPoint {
 
         // Start by setting the first source file
         assert args.length > 0;
-        List<String> srcFiles = new LinkedList<>();
-        srcFiles.add(args[0]);
-        assert srcFiles.get(0) != null && !srcFiles.get(0).equals("");
+        FileSet fileSet = parseArgs(args);
+        List<String> srcFiles = fileSet.srcFilePaths;
+        String resultFile = fileSet.testFilePath;
 
         // If there are more than 1 argument, add all but the last argument as source files
-        if (args.length > 1) {
+        if (resultFile != null) {
             srcFiles.addAll(Arrays.asList(args).subList(1, args.length - 1));
-            String resultFile = args[args.length - 1];
-            assert resultFile != null && !resultFile.equals("");
+            assert !resultFile.equals("");
             runTest(srcFiles, resultFile, params, schema); // Runs the loading tests
         } else {
-            Tester tester = new Tester(params, srcFiles.get(0), schema);
+            Tester tester = new Tester(params, srcFiles, schema);
             tester.stagingTest(); // This test will load the database using unconstrained tables as staging tables
         }
     }

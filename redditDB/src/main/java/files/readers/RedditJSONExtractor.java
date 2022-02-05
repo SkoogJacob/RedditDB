@@ -31,49 +31,19 @@ public class RedditJSONExtractor {
      *
      * @param filepath The path to the JSON file
      */
-    public RedditJSONExtractor(String filepath) throws FileNotFoundException {
-        reader = getReader(filepath);
-        scanner = new Scanner(reader);
-        filePaths = null;
+    public RedditJSONExtractor(String filepath) throws IOException {
+        this.reader = getReader(filepath);
+        this.scanner = new Scanner(reader);
+        this.filePaths = null;
 //        scanner.useDelimiter("[{}]");
         loadNextJSON();
     }
 
     public RedditJSONExtractor(List<String> filepaths) throws FileNotFoundException {
         this.reader = getReader(filepaths.get(0));
-        scanner = new Scanner(reader);
-        filePaths = filepaths;
-        filePaths.remove(0);
-    }
-
-    /**
-     * Loads the next JSON object from the reader if there are more JSON objects.
-     * It then loads the result into this.next, or it sets next to the empty string
-     * if no next object was found.
-     *
-     * Saving just in case, although I think this will be deleted soon.
-     */
-    @Deprecated
-    private void loadNextJSONOLD() {
-        if (!scanner.hasNext()) {
-            next = "";
-            return;
-        }
-        String retVal;
-        do {
-            retVal = scanner.next().trim();
-        } while (retVal.equals("") && scanner.hasNext());
-        if (retVal.equals("")) {
-            try { // Close readers and streams if there is no next
-                reader.close();
-                scanner.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            next = "";
-        } else {
-            next = "{" + retVal + "}";
-        }
+        this.scanner = new Scanner(reader);
+        this.filePaths = filepaths;
+        this.filePaths.remove(0);
     }
 
     /**
@@ -81,11 +51,13 @@ public class RedditJSONExtractor {
      * It then loads the result into this.next, or it sets next to the empty string
      * if no next object was found.
      */
-    private void loadNextJSON() throws FileNotFoundException {
+    private void loadNextJSON() throws IOException {
         if (!scanner.hasNext() && (this.filePaths == null || this.filePaths.isEmpty())) {
             next = "";
             return;
         } else if (!scanner.hasNext()) {
+            scanner.close();
+            reader.close();
             scanner = new Scanner(getReader(filePaths.get(0)));
             filePaths.remove(0);
         }
