@@ -13,27 +13,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 public class EntryPoint {
-    public static void runTest(String dataSrcPath, String reportFilePath, SQLAccessParams params, String schema) throws IOException, SQLException, InterruptedException {
-        File report = new File(reportFilePath);
-        Tester tester = new Tester(params, dataSrcPath, schema);
-        MarkDownWriter writer = new MarkDownWriter(report);
-
-        for (Test.TestType type : Test.TestType.values()) {
-            for (int testNr = 1; testNr <= 4; testNr++) {
-                String testString = PresentTest.getTestString(tester.run(type), testNr);
-                SQLTableManager.clearTables(params, schema);
-                writer.writeToFile(testString);
-            }
-        }
-    }
-
     public static void runTest(List<String> dataSrcPaths, String reportFilePath, SQLAccessParams params, String schema) throws IOException, SQLException, InterruptedException {
         File report = new File(reportFilePath);
-        Tester tester = new Tester(params, dataSrcPaths, schema);
+        Tester tester = dataSrcPaths.size() == 1 ?
+                new Tester(params, dataSrcPaths.get(0), schema) : new Tester(params, dataSrcPaths, schema);
         MarkDownWriter writer = new MarkDownWriter(report);
 
         for (Test.TestType type : Test.TestType.values()) {
@@ -72,15 +60,21 @@ public class EntryPoint {
         SchemaOperations.createSchema(params, schema);
         SQLTableManager.createUnconstrainedTables(params, schema);
         SQLTableManager.createConstrainedTables(params, schema);
-        assert args.length > 1;
-        String srcFile = args[0];
-        assert srcFile != null && !srcFile.equals("");
-        if (args.length > 2) {
-            String resultFile = args[1];
+
+        // Start by setting the first source file
+        assert args.length > 0;
+        List<String> srcFiles = new LinkedList<>();
+        srcFiles.add(args[0]);
+        assert srcFiles.get(0) != null && !srcFiles.get(0).equals("");
+
+        // If there are more than 1 argument, add all but the last argument as source files
+        if (args.length > 1) {
+            srcFiles.addAll(Arrays.asList(args).subList(1, args.length - 1));
+            String resultFile = args[args.length - 1];
             assert resultFile != null && !resultFile.equals("");
-            runTest(srcFile, resultFile, params, schema); // Runs the loading tests
+            runTest(srcFiles, resultFile, params, schema); // Runs the loading tests
         } else {
-            Tester tester = new Tester(params, srcFile, schema);
+            Tester tester = new Tester(params, srcFiles.get(0), schema);
             tester.stagingTest(); // This test will load the database using unconstrained tables as staging tables
         }
     }
