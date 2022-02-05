@@ -29,6 +29,23 @@ public class EntryPoint {
             }
         }
     }
+
+    /**
+     * <p>This function will either load the database tables once for use in the assignment
+     * or it will load it several times with different SQL methods to test performance.</p>
+     *
+     * <p>
+     *     If only one argument is used on the function it will just load the table once for use.
+     *     If two arguments are passed it will run the tests and output them to a markdown file for
+     *     review.
+     * </p>
+     * @param args Each argument should be a file path. The first should be the path to
+     *             the file containing the data for the database. The second, if desired,
+     *             should have the path to the desired output file for the test results.
+     * @throws SQLException If some sql stuff went wrong.
+     * @throws IOException If something went wrong in reading from the source file or writing to the report.
+     * @throws InterruptedException If something went wrong in the multithreading.
+     */
     public static void main(String[] args) throws SQLException, IOException, InterruptedException {
         Dotenv env = Dotenv.load();
         SQLAccessParams params = new SQLAccessParams(
@@ -43,11 +60,13 @@ public class EntryPoint {
         assert args.length > 1;
         String srcFile = args[0];
         assert srcFile != null && !srcFile.equals("");
-        String resultFile = args[1];
-        assert resultFile != null && !resultFile.equals("");
-
-//        runTest(srcFile, resultFile, params, schema); // Runs the loading tests
-        Tester tester = new Tester(params, srcFile, schema);
-        tester.stagingTest(); // This test will load the database using unconstrained tables as staging tables
+        if (args.length > 2) {
+            String resultFile = args[1];
+            assert resultFile != null && !resultFile.equals("");
+            runTest(srcFile, resultFile, params, schema); // Runs the loading tests
+        } else {
+            Tester tester = new Tester(params, srcFile, schema);
+            tester.stagingTest(); // This test will load the database using unconstrained tables as staging tables
+        }
     }
 }
