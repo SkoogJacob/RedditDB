@@ -1,5 +1,7 @@
 package files.readers;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -31,7 +33,7 @@ public class RedditJSONExtractor {
      *
      * @param filepath The path to the JSON file
      */
-    public RedditJSONExtractor(String filepath) throws IOException {
+    public RedditJSONExtractor(@NotNull String filepath) throws IOException {
         this.reader = getReader(filepath);
         this.scanner = new Scanner(reader);
         this.filePaths = null;
@@ -39,11 +41,12 @@ public class RedditJSONExtractor {
         loadNextJSON();
     }
 
-    public RedditJSONExtractor(List<String> filePaths) throws FileNotFoundException {
+    public RedditJSONExtractor(@NotNull List<String> filePaths) throws IOException {
         this.reader = getReader(filePaths.get(0));
         this.scanner = new Scanner(reader);
         this.filePaths = filePaths;
         this.filePaths.remove(0);
+        loadNextJSON();
     }
 
     /**
