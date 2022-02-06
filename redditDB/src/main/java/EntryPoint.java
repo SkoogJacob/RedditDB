@@ -41,16 +41,21 @@ public class EntryPoint {
                 env.get("SQL_UNAME"),
                 env.get("SQL_PWORD")
         );
-        final String schema = "test_db";
-        SchemaOperations.createSchema(params, schema);
-        SQLTableManager.createUnconstrainedTables(params, schema);
-        SQLTableManager.createConstrainedTables(params, schema);
+
 
         // Start by setting the first source file
         assert args.length > 0;
         FileSet fileSet = parseArgs(args);
-        List<String> srcFiles = fileSet.srcFilePaths;
-        String resultFile = fileSet.testFilePath;
+        List<String> srcFiles = fileSet.srcFilePaths();
+        String resultFile = fileSet.testFilePath();
+        assert srcFiles.size() > 0;
+        assert fileSet.schemaName() != null && !fileSet.schemaName().equals("");
+
+        final String schema = fileSet.schemaName();
+        SchemaOperations.dropSchema(params, schema);
+        SchemaOperations.createSchema(params, schema);
+        SQLTableManager.createUnconstrainedTables(params, schema);
+        SQLTableManager.createConstrainedTables(params, schema);
 
         // If there are more than 1 argument, add all but the last argument as source files
         if (resultFile != null) {
@@ -59,6 +64,7 @@ public class EntryPoint {
         } else {
             Tester tester = new Tester(params, srcFiles, schema);
             tester.stagingTest(); // This test will load the database using unconstrained tables as staging tables
+            AddOperations.addOperations(params, schema);
         }
     }
 
@@ -81,7 +87,9 @@ public class EntryPoint {
     private static FileSet parseArgs(String[] args) {
         int argsLeft = args.length;
         boolean testFlag = false;
+        boolean schemaFlag = false;
         String testFilePath = null;
+        String schemaName = null;
         List<String> srcFilePaths = new LinkedList<>();
 
         for (String currArg : args) {
@@ -90,21 +98,25 @@ public class EntryPoint {
             if (testFlag && testFilePath == null) {
                 testFilePath = currArg;
                 consumed = true;
+            } else if (schemaFlag && schemaName == null) {
+                schemaName = currArg;
+                consumed = true;
             }
             testFlag = currArg.equals("--testOutput");
+            schemaFlag = currArg.equals("--schema");
 
             // Throwing errors if --testOutput has been passed twice or if it was passed as the final arg
-            if (testFlag && testFilePath != null) {
+            if ((testFlag && testFilePath != null) || (schemaFlag && schemaName != null)) {
                 throw new IllegalArgumentException("--testOutput may only be specified once!");
-            } else if (testFlag && argsLeft == 0) {
-                throw new IllegalArgumentException("--testOutput requires an accompanying filepath");
+            } else if ((testFlag || schemaFlag) && argsLeft == 0) {
+                throw new IllegalArgumentException("--testOutput and --schema requires an accompanying filepath");
             }
 
-            if (!testFlag && !consumed) srcFilePaths.add(currArg);
+            if (!testFlag && !schemaFlag && !consumed) srcFilePaths.add(currArg);
         }
-        return new FileSet(testFilePath, srcFilePaths);
+        return new FileSet(schemaName, testFilePath, srcFilePaths);
     }
 
-    private record FileSet(String testFilePath, List<String> srcFilePaths) {
+    private record FileSet(String schemaName, String testFilePath, List<String> srcFilePaths) {
     }
 }
