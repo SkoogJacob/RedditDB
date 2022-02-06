@@ -22,7 +22,9 @@ public final class SchemaOperations {
             conn.createStatement().execute("CREATE SCHEMA %1$s COLLATE utf8mb4_unicode_ci;".formatted(schemaName));
             noException = true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (!e.getMessage().contains("exists")) {
+                e.printStackTrace();
+            }
         }
         return noException;
     }

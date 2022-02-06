@@ -25,7 +25,7 @@ public final class SQLTableManager {
             createConstrainedTablesPrivate(conn, targetSchema);
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (!e.getMessage().contains("exists")) e.printStackTrace();
             return false;
         }
     }
@@ -113,7 +113,7 @@ public final class SQLTableManager {
             createUnconstrainedTablesPrivate(conn, targetSchema);
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (!e.getMessage().contains("exists")) e.printStackTrace();
             return false;
         }
     }
