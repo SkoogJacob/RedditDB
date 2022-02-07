@@ -99,7 +99,7 @@ public final class SQLTableManager {
                         ON UPDATE CASCADE ON DELETE NO ACTION
                 );
                 """.formatted(redditComments, redditCommentsShort, redditUsers, subreddits).trim());
-        addIndices(statement);
+        addCommentIndices(statement);
         statement.executeBatch();
     }
 
@@ -176,7 +176,7 @@ public final class SQLTableManager {
         }
     }
     private static void clearTablesPrivate(@NotNull final Connection conn, @NotNull final String targetSchema) throws SQLException {
-        dropIndexes(conn, targetSchema);
+        dropCommentIndexes(conn, targetSchema);
         conn.setCatalog(targetSchema);
         Statement statement = conn.createStatement();
 
@@ -184,7 +184,7 @@ public final class SQLTableManager {
         statement.addBatch("DELETE FROM subreddits_constrained;");
         statement.addBatch("DELETE FROM redditors_constrained;");
         statement.addBatch("INSERT INTO redditors_constrained (username) VALUES ('[deleted]')");
-        addIndices(statement); // Adds indices queries to batch
+        addCommentIndices(statement); // Adds indices queries to batch
         try {
             statement.executeBatch();
         } catch (SQLException ignore) { }
@@ -213,7 +213,7 @@ public final class SQLTableManager {
         }
     }
     private static void dropTablesPrivate(@NotNull final Connection conn, @NotNull final String targetSchema) throws SQLException {
-        dropIndexes(conn, targetSchema);
+        dropCommentIndexes(conn, targetSchema);
         conn.setCatalog(targetSchema);
         Statement statement = conn.createStatement();
         statement.addBatch("""
@@ -239,7 +239,7 @@ public final class SQLTableManager {
         statement.close();
     }
 
-    private static void dropIndexes(@NotNull Connection conn, @NotNull String targetSchema) throws SQLException {
+    public static void dropCommentIndexes(@NotNull Connection conn, @NotNull String targetSchema) throws SQLException {
         conn.setCatalog(targetSchema);
         Statement statement = conn.createStatement();
         statement.addBatch("""
@@ -271,39 +271,34 @@ public final class SQLTableManager {
     }
 
     /**
-     * Adds indices to the columns in comments_constrained
+     * Adds batch queries to the passed statement to add indices to comments_constrained
      *
      * @param statement The statement to add batches to. The statement should be set to the correct schema.
      * @throws SQLException If bad sql stuff
      */
-    public static void addIndices(Statement statement) throws SQLException {
-        final String redditUsers = "redditors_constrained";
-        final String redditUsersShort = "rc";
-        final String subreddits = "subreddits_constrained";
-        final String subredditsShort = "sc";
+    public static void addCommentIndices(Statement statement) throws SQLException {
         final String redditComments = "comments_constrained";
-        final String redditCommentsShort = "cc";
 
         statement.addBatch("""
-            CREATE UNIQUE INDEX IF NOT EXISTS %2$s_id_uindex ON %1$s (id);
-            """.formatted(redditComments, redditCommentsShort).trim());
+            CREATE UNIQUE INDEX IF NOT EXISTS cc_id_uindex ON comments_constrained (id);
+            """.trim());
         statement.addBatch("""
-            CREATE INDEX author_index ON %1$s (author);
-            """.formatted(redditComments));
+            CREATE INDEX author_index ON comments_constrained (author);
+            """);
         statement.addBatch("""
-            CREATE INDEX created_utc_index ON %1$s (created_utc DESC);
-            """.formatted(redditComments));
+            CREATE INDEX created_utc_index ON comments_constrained (created_utc DESC);
+            """);
         statement.addBatch("""
-            CREATE INDEX link_id_index ON %1$s (link_id);
-            """.formatted(redditComments));
+            CREATE INDEX link_id_index ON comments_constrained (link_id);
+            """);
         statement.addBatch("""
-            CREATE INDEX parent_id_index ON %1$s (parent_id);
-            """.formatted(redditComments));
+            CREATE INDEX parent_id_index ON comments_constrained (parent_id);
+            """);
         statement.addBatch("""
-            CREATE INDEX score_index ON %1$s (score DESC);
-            """.formatted(redditComments));
+            CREATE INDEX score_index ON comments_constrained (score DESC);
+            """);
         statement.addBatch("""
-            CREATE INDEX subreddit_id_index ON %1$s (subreddit_id)
-            """.formatted(redditComments));
+            CREATE INDEX subreddit_id_index ON comments_constrained (subreddit_id)
+            """);
     }
 }
