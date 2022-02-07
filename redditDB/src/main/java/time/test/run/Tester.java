@@ -109,8 +109,8 @@ public final class Tester {
         return collateResult(totalTime, tableName, Test.TestType.PRESTAGED);
     }
 
-    private void loadTables(boolean multiThreaded, RedditJSONExtractor extractor, JsonAdapter<FullComment> adapter, int coreCount) throws IOException, SQLException, InterruptedException {
-        final int batchSize = multiThreaded ? 6000 : 50000; // Work with smaller batches when multithreaded
+    private void loadTables(boolean unconstrained, RedditJSONExtractor extractor, JsonAdapter<FullComment> adapter, int coreCount) throws IOException, SQLException, InterruptedException {
+        final int batchSize = unconstrained ? 6000 : 50000; // Work with smaller batches when multithreaded
         LinkedList<FullComment> comments = new LinkedList<>();
         LinkedList<Thread> threads = new LinkedList<>();
 
@@ -121,7 +121,7 @@ public final class Tester {
                 FullComment[] data = new FullComment[comments.size()];
                 comments.toArray(data);
                 comments.clear();
-                if (multiThreaded) {
+                if (unconstrained) {
                     Thread t = new Thread(new DBLoaderUnconstrained(params, schema, data));
                     t.start();
                     threads.add(t);
@@ -136,6 +136,7 @@ public final class Tester {
             }
         }
         for (Thread t : threads) try { t.join(); } catch (InterruptedException ignored) { }
+
     }
 
     private Test collateResult(long totalTime, String tableName, Test.TestType type) throws SQLException {
