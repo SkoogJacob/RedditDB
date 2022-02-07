@@ -99,7 +99,6 @@ public final class SQLTableManager {
                         ON UPDATE CASCADE ON DELETE NO ACTION
                 );
                 """.formatted(redditComments, redditCommentsShort, redditUsers, subreddits).trim());
-        addCommentIndices(statement);
         statement.executeBatch();
     }
 
@@ -277,8 +276,6 @@ public final class SQLTableManager {
      * @throws SQLException If bad sql stuff
      */
     public static void addCommentIndices(Statement statement) throws SQLException {
-        final String redditComments = "comments_constrained";
-
         statement.addBatch("""
             CREATE UNIQUE INDEX IF NOT EXISTS cc_id_uindex ON comments_constrained (id);
             """.trim());

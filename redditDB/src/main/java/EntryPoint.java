@@ -63,7 +63,7 @@ public class EntryPoint {
             runTest(srcFiles, resultFile, params, schema); // Runs the loading tests
         } else {
             Tester tester = new Tester(params, srcFiles, schema);
-            tester.stagingTest(); // This test will load the database using unconstrained tables as staging tables
+            tester.constrainedTest(); // This test will load the database using unconstrained tables as staging tables
             AddOperations.addOperations(params, schema);
         }
     }
