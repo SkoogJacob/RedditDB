@@ -54,7 +54,6 @@ public class EntryPoint {
         assert fileSet.schemaName() != null && !fileSet.schemaName().equals("");
 
         final String schema = fileSet.schemaName();
-        SchemaOperations.dropSchema(params, schema);
         SchemaOperations.createSchema(params, schema);
         SQLTableManager.createUnconstrainedTables(params, schema);
         SQLTableManager.createConstrainedTables(params, schema);
