@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * various tables used in this assignment.
  */
 public final class SQLTableManager {
-    private SQLTableManager() { };
+    private SQLTableManager() { }
 
     /**
      * Creates all the tables for reddit comments with various constraints to ensure sane values.
@@ -44,38 +44,42 @@ public final class SQLTableManager {
         final String redditComments = "comments_constrained";
         final String redditCommentsShort = "cc";
 
+        conn.setCatalog(targetSchema);
         Statement statement = conn.createStatement();
         // Creating user table and inserting a default username '[deleted]'
         statement.addBatch("""
-            CREATE TABLE %1$s.%2$s
+            CREATE TABLE %1$s
             (
                 username    VARCHAR(20) NOT NULL,
-                CONSTRAINT %3$s_pk PRIMARY KEY (username)
+                CONSTRAINT %2$s_pk PRIMARY KEY (username)
             );
-            """.formatted(targetSchema, redditUsers, redditUsersShort).trim());
+            """.formatted(redditUsers, redditUsersShort).trim());
         statement.addBatch("""
-            CREATE UNIQUE INDEX IF NOT EXISTS %3$s_username_uindex ON %1$s.%2$s (username);
-            """.formatted(targetSchema, redditUsers, redditUsersShort).trim());
+            CREATE UNIQUE INDEX IF NOT EXISTS %2$s_username_uindex ON %1$s (username);
+            """.formatted(redditUsers, redditUsersShort).trim());
         statement.addBatch("""
-            INSERT INTO %1$s.%2$s (username) VALUES ('[deleted]');
-            """.formatted(targetSchema, redditUsers));
+            INSERT INTO %1$s (username) VALUES ('[deleted]');
+            """.formatted(redditUsers));
 
         // Creating subreddits table, no default value as deletion cascades
         statement.addBatch("""
-            CREATE TABLE %1$s.%2$s
+            CREATE TABLE %1$s
             (
                 subreddit_id    VARCHAR(10) NOT NULL,
-                subreddit_name  VARCHAR(20) NOT NULL,
-                CONSTRAINT %3$s_pk
+                subreddit_name  VARCHAR(24) NOT NULL,
+                CONSTRAINT %2$s_pk
                     PRIMARY KEY (subreddit_id)
             );
-            """.formatted(targetSchema, subreddits, subredditsShort).trim());
+            """.formatted(subreddits, subredditsShort).trim());
         statement.addBatch("""
-                CREATE UNIQUE INDEX %3$s_subreddit_id_uindex ON %1$s.%2$s (subreddit_id);
-                """.formatted(targetSchema, subreddits, subredditsShort).trim());
+                CREATE UNIQUE INDEX %2$s_subreddit_id_uindex ON %1$s (subreddit_id);
+                """.formatted(subreddits, subredditsShort).trim());
+        statement.addBatch("""
+            CREATE INDEX subreddit_name_index ON %1$s (subreddit_name);
+            """.formatted(subreddits).trim());
         // Creating comments table
         statement.addBatch("""
-                CREATE TABLE %1$s.%2$s
+                CREATE TABLE %1$s
                 (
                     id              VARCHAR(10)                                 NOT NULL,
                     parent_id       VARCHAR(10)                                 NOT NULL,
@@ -86,18 +90,36 @@ public final class SQLTableManager {
                     subreddit_id    VARCHAR(10)                                 NOT NULL,
                     score           INT                                         NOT NULL,
                     created_utc     INT                                         NOT NULL,
-                    CONSTRAINT %3$s_pk PRIMARY KEY (id),
-                    CONSTRAINT %3$s___fk_author_exists
-                        FOREIGN KEY (author) REFERENCES %1$s.%4$s (username)
+                    CONSTRAINT %2$s_pk PRIMARY KEY (id),
+                    CONSTRAINT %2$s___fk_author_exists
+                        FOREIGN KEY (author) REFERENCES %3$s (username)
                         ON UPDATE CASCADE ON DELETE SET DEFAULT,
                     CONSTRAINT %3$s___fk_subreddit_exists
-                        FOREIGN KEY (subreddit_id) REFERENCES %1$s.%5$s (subreddit_id)
+                        FOREIGN KEY (subreddit_id) REFERENCES %4$s (subreddit_id)
                         ON UPDATE CASCADE ON DELETE NO ACTION
                 );
-                """.formatted(targetSchema, redditComments, redditCommentsShort, redditUsers, subreddits).trim());
+                """.formatted(redditComments, redditCommentsShort, redditUsers, subreddits).trim());
         statement.addBatch("""
-            CREATE UNIQUE INDEX IF NOT EXISTS %3$s_id_uindex ON %1$s.%2$s (id);
-            """.formatted(targetSchema, redditComments, redditCommentsShort).trim());
+            CREATE UNIQUE INDEX IF NOT EXISTS %2$s_id_uindex ON %1$s (id);
+            """.formatted(redditComments, redditCommentsShort).trim());
+        statement.addBatch("""
+            CREATE INDEX author_index ON %1$s (author);
+            """.formatted(redditComments));
+        statement.addBatch("""
+            CREATE INDEX created_utc_index ON %1$s (created_utc DESC);
+            """.formatted(redditComments));
+        statement.addBatch("""
+            CREATE INDEX link_id_index ON %1$s (link_id);
+            """.formatted(redditComments));
+        statement.addBatch("""
+            CREATE INDEX parent_id_index ON %1$s (parent_id);
+            """.formatted(redditComments));
+        statement.addBatch("""
+            CREATE INDEX score_index ON %1$s (score DESC);
+            """.formatted(redditComments));
+        statement.addBatch("""
+            CREATE INDEX subreddit_id_index ON %1$s (subreddit_id)
+            """.formatted(redditComments));
         statement.executeBatch();
     }
 
@@ -136,7 +158,7 @@ public final class SQLTableManager {
             CREATE TABLE %1$s.%2$s
             (
                 subreddit_id    VARCHAR(10) NULL,
-                subreddit_name  VARCHAR(20) NULL
+                subreddit_name  VARCHAR(24) NULL
             );
             """.formatted(targetSchema, subreddits).trim());
         // Creating comments table

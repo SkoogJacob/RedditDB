@@ -1,8 +1,7 @@
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import comments.FullComment;
-import db.accessors.*;
-import files.readers.RedditJSONExtractor;
+import db.accessors.AddOperations;
+import db.accessors.SQLAccessParams;
+import db.accessors.SQLTableManager;
+import db.accessors.SchemaOperations;
 import files.writers.MarkDownWriter;
 import io.github.cdimascio.dotenv.Dotenv;
 import time.test.present.PresentTest;
@@ -10,10 +9,8 @@ import time.test.run.Test;
 import time.test.run.Tester;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.*;
-import java.util.Arrays;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,6 +18,11 @@ public class EntryPoint {
     /**
      * <p>This function will either load the database tables once for use in the assignment
      * or it will load it several times with different SQL methods to test performance.</p>
+     *
+     * <p>
+     *     <b>DO PASS --testOutput FLAG WITH BIG FILES</b>
+     *     <p>The constrained tables loader is very bad and gets exponentially worse at big datasets.</p>
+     * </p>
      *
      * <p>
      *     If only one argument is used on the function it will just load the table once for use.
@@ -57,7 +59,6 @@ public class EntryPoint {
         SQLTableManager.createUnconstrainedTables(params, schema);
         SQLTableManager.createConstrainedTables(params, schema);
 
-        // If there are more than 1 argument, add all but the last argument as source files
         if (resultFile != null) {
             assert !resultFile.equals("");
             runTest(srcFiles, resultFile, params, schema); // Runs the loading tests
@@ -83,6 +84,7 @@ public class EntryPoint {
             }
         }
     }
+
 
     private static FileSet parseArgs(String[] args) {
         int argsLeft = args.length;
