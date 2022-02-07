@@ -87,6 +87,7 @@ public final class Tester {
 
     public Test constrainedTest() throws IOException, SQLException, InterruptedException {
         RedditJSONExtractor extractor = getJSONExtractor();
+        final int coreCount = Runtime.getRuntime().availableProcessors();
 
         long startTime = System.nanoTime();
         loadTables(false, extractor, adapter, 1);
