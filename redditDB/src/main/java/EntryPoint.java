@@ -77,7 +77,8 @@ public class EntryPoint {
 
         for (Test.TestType type : Test.TestType.values()) {
             for (int testNr = 1; testNr <= 3; testNr++) {
-                String testString = PresentTest.getTestString(tester.run(type), testNr);
+                Test testResult = tester.run(type);
+                String testString = PresentTest.getTestString(testResult, testNr);
                 SQLTableManager.clearTables(params, schema);
                 writer.writeToFile(testString);
             }

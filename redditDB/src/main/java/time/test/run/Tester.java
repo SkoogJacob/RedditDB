@@ -103,6 +103,15 @@ public final class Tester {
         long startTime = System.nanoTime();
         loadTables(true, extractor, adapter, coreCount);
         new LoadAfterStaging(params, schema).load();
+
+        Connection conn = params.getConnection();
+        conn.setCatalog(schema);
+        Statement statement = conn.createStatement();
+        SQLTableManager.addCommentIndices(statement);
+        statement.executeBatch();
+        statement.close();
+        conn.close();
+
         long totalTime = System.nanoTime() - startTime;
         String tableName = schema + ".comments_constrained";
 
@@ -121,22 +130,28 @@ public final class Tester {
                 FullComment[] data = new FullComment[comments.size()];
                 comments.toArray(data);
                 comments.clear();
+                Thread t;
                 if (unconstrained) {
-                    Thread t = new Thread(new DBLoaderUnconstrained(params, schema, data));
-                    t.start();
-                    threads.add(t);
-                    if (threads.size() == coreCount) {
-                        threads.getFirst().join();
-                        threads.removeFirst();
-                    }
+                    t = new Thread(new DBLoaderUnconstrained(params, schema, data));
                 } else {
-                    DBLoaderConstrained loader = new DBLoaderConstrained(params, schema, data);
-                    loader.run();
+                    t = new Thread(new DBLoaderConstrained(params, schema, data));
+                }
+                t.start();
+                threads.add(t);
+                if (threads.size() == coreCount) {
+                    threads.getFirst().join();
+                    threads.removeFirst();
                 }
             }
         }
         for (Thread t : threads) try { t.join(); } catch (InterruptedException ignored) { }
-
+        Connection conn = params.getConnection();
+        conn.setCatalog(schema);
+        Statement statement = conn.createStatement();
+        SQLTableManager.addCommentIndices(statement);
+        statement.executeBatch();
+        statement.close();
+        conn.close();
     }
 
     private Test collateResult(long totalTime, String tableName, Test.TestType type) throws SQLException {
