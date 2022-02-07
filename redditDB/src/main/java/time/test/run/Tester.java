@@ -110,7 +110,7 @@ public final class Tester {
     }
 
     private void loadTables(boolean multiThreaded, RedditJSONExtractor extractor, JsonAdapter<FullComment> adapter, int coreCount) throws IOException, SQLException, InterruptedException {
-        final int batchSize = multiThreaded ? 3000 : 30000; // Work with smaller batches when multithreaded
+        final int batchSize = multiThreaded ? 6000 : 50000; // Work with smaller batches when multithreaded
         LinkedList<FullComment> comments = new LinkedList<>();
         LinkedList<Thread> threads = new LinkedList<>();
 

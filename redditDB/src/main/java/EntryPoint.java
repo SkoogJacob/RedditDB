@@ -76,7 +76,7 @@ public class EntryPoint {
         MarkDownWriter writer = new MarkDownWriter(report);
 
         for (Test.TestType type : Test.TestType.values()) {
-            for (int testNr = 1; testNr <= 4; testNr++) {
+            for (int testNr = 1; testNr <= 3; testNr++) {
                 String testString = PresentTest.getTestString(tester.run(type), testNr);
                 SQLTableManager.clearTables(params, schema);
                 writer.writeToFile(testString);
