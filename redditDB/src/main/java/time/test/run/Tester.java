@@ -11,7 +11,6 @@ import files.readers.RedditJSONExtractor;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -89,6 +88,16 @@ public final class Tester {
         RedditJSONExtractor extractor = getJSONExtractor();
         final int coreCount = Runtime.getRuntime().availableProcessors();
 
+        Connection conn = params.getConnection();
+        conn.setCatalog(schema);
+        Statement statement = conn.createStatement();
+        SQLTableManager.dropForeignIndices(statement);
+        SQLTableManager.dropCommentIndexes(statement);
+        SQLTableManager.addForeignIndices(statement);
+        statement.executeBatch();
+        statement.close();
+        conn.close();
+
         long startTime = System.nanoTime();
         loadTables(false, extractor, adapter, 1);
         long totalTime = System.nanoTime() - startTime;
@@ -156,6 +165,7 @@ public final class Tester {
 
     private Test collateResult(long totalTime, String tableName, Test.TestType type) throws SQLException {
         Connection conn = params.getConnection();
+        conn.setCatalog(schema);
         Statement statement = conn.createStatement();
         ResultSet result = statement.executeQuery("""
             SELECT COUNT(*) FROM %1$s;

@@ -21,29 +21,51 @@ public class AddOperations {
         Statement statement = conn.createStatement();
         // Adding function to get total number of posts of user.
         addGetTotalPostsFunc(statement);
+        statement.executeBatch();
+        statement.clearBatch();
         // Add functions to translate from subreddit ID to subreddit name and vice versa
         addSubredditIdAndNameTranslatorFunctions(statement);
+        statement.executeBatch();
+        statement.clearBatch();
         // Add function to translate epoch to date
         addEpochToDateFunction(statement);
+        statement.executeBatch();
+        statement.clearBatch();
         // Add a view of the comments_constrained scheme to show only comment id, subreddit name and posted date
         addCommentDateView(statement);
+        statement.executeBatch();
+        statement.clearBatch();
         // Add a procedure to get average posts per day for a subreddit
         addAveragePostsPerDayInSubreddit(statement);
+        statement.executeBatch();
+        statement.clearBatch();
         // Add a procedure for finding number of posts containing phrase
         addPostsContainingProcedure(statement);
+        statement.executeBatch();
+        statement.clearBatch();
         // Adds a procedure to select what subreddits commenters of a particular thread have particiapted in
         addParticipatedInFromPost(statement);
+        statement.executeBatch();
+        statement.clearBatch();
         // Adds procedures to get lowest and highest score users in the dataset.
         addHighLowScoreProcedures(statement);
+        statement.executeBatch();
+        statement.clearBatch();
         // Adds procedures to find the subreddits with the highest and lowest scores
         addHighLowSubredditScoreProcedures(statement);
+        statement.executeBatch();
+        statement.clearBatch();
         // Add procedure to find all users that one user might have potentially interacted with
         addPotentialInteractionsProcedure(statement);
+        statement.executeBatch();
+        statement.clearBatch();
         // Add procedure to find all users who have particiapted in at most n subreddits
         addPostedToMaxNSubreddits(statement);
+        statement.executeBatch();
+        statement.clearBatch();
 
         // Finally, execute batch
-        statement.executeBatch();
+//        statement.executeBatch();
         // Close resources
         statement.close();
         conn.close();
@@ -61,7 +83,7 @@ public class AddOperations {
                             FROM comments_constrained
                             WHERE NOT author='[deleted]'
                         ) AS author_reddits
-                    GROUP BY author) AS 'only_n_reddits'
+                    GROUP BY author) AS only_n_reddits
                     WHERE subreddit_count<=p_n;
                 END;
             """);
@@ -254,8 +276,8 @@ public class AddOperations {
                     RETURN
                         (SELECT COUNT(*)
                             FROM comments_constrained
-                            WHERE author=p_username;
-                        )
+                            WHERE author=p_username
+                        );
                 END;
             """.trim()
         );

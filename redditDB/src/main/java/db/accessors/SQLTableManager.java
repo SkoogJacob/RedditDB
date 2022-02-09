@@ -90,15 +90,12 @@ public final class SQLTableManager {
                     subreddit_id    VARCHAR(10)                                 NOT NULL,
                     score           INT                                         NOT NULL,
                     created_utc     INT                                         NOT NULL,
-                    CONSTRAINT %2$s_pk PRIMARY KEY (id),
-                    CONSTRAINT %2$s___fk_author_exists
-                        FOREIGN KEY (author) REFERENCES %3$s (username)
-                        ON UPDATE CASCADE ON DELETE SET DEFAULT,
-                    CONSTRAINT %3$s___fk_subreddit_exists
-                        FOREIGN KEY (subreddit_id) REFERENCES %4$s (subreddit_id)
-                        ON UPDATE CASCADE ON DELETE NO ACTION
+                    CONSTRAINT %2$s_pk PRIMARY KEY (id)
                 );
-                """.formatted(redditComments, redditCommentsShort, redditUsers, subreddits).trim());
+                """.formatted(redditComments, redditCommentsShort).trim());
+        statement.executeBatch();
+        statement.clearBatch();
+        addForeignIndices(statement);
         statement.executeBatch();
     }
 
@@ -175,14 +172,16 @@ public final class SQLTableManager {
         }
     }
     private static void clearTablesPrivate(@NotNull final Connection conn, @NotNull final String targetSchema) throws SQLException {
-        dropCommentIndexes(conn, targetSchema);
         conn.setCatalog(targetSchema);
         Statement statement = conn.createStatement();
+        dropForeignIndices(statement);
+        dropCommentIndexes(statement);
 
         statement.addBatch("DELETE FROM comments_constrained;");
         statement.addBatch("DELETE FROM subreddits_constrained;");
         statement.addBatch("DELETE FROM redditors_constrained;");
         statement.addBatch("INSERT INTO redditors_constrained (username) VALUES ('[deleted]')");
+        addForeignIndices(statement);
         addCommentIndices(statement); // Adds indices queries to batch
         try {
             statement.executeBatch();
@@ -212,9 +211,10 @@ public final class SQLTableManager {
         }
     }
     private static void dropTablesPrivate(@NotNull final Connection conn, @NotNull final String targetSchema) throws SQLException {
-        dropCommentIndexes(conn, targetSchema);
         conn.setCatalog(targetSchema);
         Statement statement = conn.createStatement();
+        dropForeignIndices(statement);
+        dropCommentIndexes(statement);
         statement.addBatch("""
             DROP TABLE IF EXISTS %1$s.reddit_comments_constrained;
             """.formatted(targetSchema));
@@ -238,11 +238,12 @@ public final class SQLTableManager {
         statement.close();
     }
 
-    public static void dropCommentIndexes(@NotNull Connection conn, @NotNull String targetSchema) throws SQLException {
-        conn.setCatalog(targetSchema);
-        Statement statement = conn.createStatement();
+    public static void dropCommentIndexes(Statement statement) throws SQLException {
         statement.addBatch("""
             DROP INDEX IF EXISTS author_index ON comments_constrained;
+            """);
+        statement.addBatch("""
+            DROP INDEX IF EXISTS body_index ON comments_constrained;
             """);
         statement.addBatch("""
             DROP INDEX IF EXISTS created_utc_index ON comments_constrained;
@@ -265,8 +266,6 @@ public final class SQLTableManager {
         statement.addBatch("""
             DROP INDEX IF EXISTS author_index ON comments_constrained;
             """);
-        statement.executeBatch();
-        statement.close();
     }
 
     /**
@@ -280,22 +279,63 @@ public final class SQLTableManager {
             CREATE UNIQUE INDEX IF NOT EXISTS cc_id_uindex ON comments_constrained (id);
             """.trim());
         statement.addBatch("""
-            CREATE INDEX author_index ON comments_constrained (author);
+            CREATE INDEX IF NOT EXISTS author_index ON comments_constrained (author);
             """);
         statement.addBatch("""
-            CREATE INDEX created_utc_index ON comments_constrained (created_utc DESC);
+            CREATE INDEX IF NOT EXISTS body_index ON comments_constrained (body);
             """);
         statement.addBatch("""
-            CREATE INDEX link_id_index ON comments_constrained (link_id);
+            CREATE INDEX IF NOT EXISTS created_utc_index ON comments_constrained (created_utc DESC);
             """);
         statement.addBatch("""
-            CREATE INDEX parent_id_index ON comments_constrained (parent_id);
+            CREATE INDEX IF NOT EXISTS link_id_index ON comments_constrained (link_id);
             """);
         statement.addBatch("""
-            CREATE INDEX score_index ON comments_constrained (score DESC);
+            CREATE INDEX IF NOT EXISTS parent_id_index ON comments_constrained (parent_id);
             """);
         statement.addBatch("""
-            CREATE INDEX subreddit_id_index ON comments_constrained (subreddit_id)
+            CREATE INDEX IF NOT EXISTS score_index ON comments_constrained (score DESC);
+            """);
+        statement.addBatch("""
+            CREATE INDEX IF NOT EXISTS subreddit_id_index ON comments_constrained (subreddit_id)
+            """);
+    }
+
+    /**
+     * Adds query batches to the passed statement to remove the comments_constrained table foreign keys
+     * @param statement The statement to add the queries to.
+     * @throws SQLException If bad SQL things
+     */
+    public static void dropForeignIndices(Statement statement) throws SQLException {
+        statement.addBatch("""
+            ALTER TABLE comments_constrained
+                DROP FOREIGN KEY cc___fk_author_exists;
+            """);
+        statement.addBatch("""
+            ALTER TABLE comments_constrained
+                DROP FOREIGN KEY cc___fk_subreddit_exists;
+            """);
+    }
+
+    /**
+     * Adds query batches to the passed statement to add foreign keys for subreddit_id and author to
+     * comments_constrained table.
+     * @param statement The table to add the queries to.
+     * @throws SQLException If bad SQL things.
+     */
+    public static void addForeignIndices(Statement statement) throws SQLException {
+        statement.addBatch("""
+            ALTER TABLE comments_constrained
+                ADD CONSTRAINT cc___fk_author_exists
+                    FOREIGN KEY (author) REFERENCES redditors_constrained (username)
+                        ON UPDATE CASCADE ON DELETE SET DEFAULT;
+            """);
+        statement.addBatch("""
+            ALTER TABLE comments_constrained
+                ADD CONSTRAINT cc___fk_subreddit_exists
+                    FOREIGN KEY (subreddit_id) REFERENCES
+                        subreddits_constrained (subreddit_id)
+                            ON UPDATE CASCADE ON DELETE SET DEFAULT;
             """);
     }
 }
