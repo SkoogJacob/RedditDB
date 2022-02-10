@@ -30,7 +30,7 @@ public class AddOperations {
         // Add a procedure to get average posts per day for a subreddit
         addAveragePostsPerDayInSubreddit(statement);
         // Add a procedure for finding number of posts containing phrase
-        addPostsContainingProcedure(statement);
+        addPostsContainingFunction(statement);
         // Adds a procedure to select what subreddits commenters of a particular thread have particiapted in
         addParticipatedInFromPost(statement);
         // Adds procedures to get lowest and highest score users in the dataset.
@@ -159,15 +159,15 @@ public class AddOperations {
             """);
     }
 
-    private static void addPostsContainingProcedure(Statement statement) throws SQLException {
+    private static void addPostsContainingFunction(Statement statement) throws SQLException {
         statement.addBatch("""
-            CREATE PROCEDURE posts_containing(
-                IN p_search_term VARCHAR(50),
-                OUT number_containing INT
+            CREATE FUNCTION posts_containing(
+                p_search_term VARCHAR(50)
             )
+                RETURNS INT
                 READS SQL DATA
                 BEGIN
-                    SET number_containing = (
+                    RETURN  (
                         SELECT COUNT(*) FROM
                             (SELECT * FROM comments_constrained
                             WHERE body LIKE CONCAT('%', p_search_term, '%'))

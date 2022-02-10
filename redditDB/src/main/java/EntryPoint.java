@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class EntryPoint {
+    private static SQLAccessParams params;
     /**
      * <p>This function will either load the database tables once for use in the assignment
      * or it will load it several times with different SQL methods to test performance.</p>
@@ -38,7 +39,7 @@ public class EntryPoint {
      */
     public static void main(String[] args) throws SQLException, IOException, InterruptedException {
         Dotenv env = Dotenv.load();
-        SQLAccessParams params = new SQLAccessParams(
+        params = new SQLAccessParams(
                 env.get("SQL_URL"),
                 env.get("SQL_UNAME"),
                 env.get("SQL_PWORD")
@@ -87,6 +88,15 @@ public class EntryPoint {
 
 
     private static FileSet parseArgs(String[] args) {
+        if (args[0].equals("--only-load-procedures")) {
+            try {
+                AddOperations.addOperations(params, args[1]);
+                System.exit(0);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         int argsLeft = args.length;
         boolean testFlag = false;
         boolean schemaFlag = false;
