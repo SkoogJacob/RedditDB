@@ -180,7 +180,7 @@ public class AddOperations {
     private static void addAveragePostsPerDayInSubreddit(Statement statement) throws SQLException {
         statement.addBatch("""
             CREATE PROCEDURE posts_per_day(
-                IN p_subreddit_name VARCHAR(20),
+                IN p_subreddit_name VARCHAR(24),
                 OUT p_posts_per_day FLOAT
             )
                 READS SQL DATA
