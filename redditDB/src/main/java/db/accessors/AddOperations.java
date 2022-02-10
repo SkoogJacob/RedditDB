@@ -277,7 +277,7 @@ public class AddOperations {
         statement.addBatch("""
             CREATE FUNCTION
                 get_subreddit_name(p_subreddit_id VARCHAR(10))
-                RETURNS VARCHAR(20)
+                RETURNS VARCHAR(24)
                 READS SQL DATA
                 BEGIN
                     RETURN
@@ -291,7 +291,7 @@ public class AddOperations {
 
         statement.addBatch("""
             CREATE FUNCTION
-                get_subreddit_id(p_subreddit_name VARCHAR(20))
+                get_subreddit_id(p_subreddit_name VARCHAR(24))
                 RETURNS VARCHAR(10)
                 READS SQL DATA
                 BEGIN
