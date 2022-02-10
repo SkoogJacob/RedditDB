@@ -179,13 +179,13 @@ public class AddOperations {
 
     private static void addAveragePostsPerDayInSubreddit(Statement statement) throws SQLException {
         statement.addBatch("""
-            CREATE PROCEDURE posts_per_day(
-                IN p_subreddit_name VARCHAR(24),
-                OUT p_posts_per_day FLOAT
+            CREATE FUNCTION posts_per_day(
+                p_subreddit_name VARCHAR(24)
             )
+                RETURNS FLOAT(10, 3)
                 READS SQL DATA
                 BEGIN
-                    SET p_posts_per_day =
+                    RETURN
                         (SELECT AVG(posts_in_day) AS avg_per_day FROM (
                             SELECT COUNT(posted_date) AS posts_in_day
                             FROM comment_date_view
