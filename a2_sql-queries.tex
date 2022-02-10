@@ -5,6 +5,11 @@
           WHERE  author='username';
     \end{verbatim}
     All usernames can be queried from the schema.redditors table.
+    Showing one example of running this code as a stored function in figure~\ref{fig:number-of-comments-figure} below.
+    \begin{figure}[h]
+    \includegraphics[width=400px] {number_of_posts}\label{fig:number-of-comments-figure}
+        \caption {The query was run in about 44ms}
+    \end{figure}
 
 \subsection{Comments per day in subreddit}\label{subsec:comments-per-day}
     First, I define a SQL function to translate the subreddit\_id to subreddit\_name for prettier presentation.
@@ -13,7 +18,7 @@
     \begin{verbatim}
 CREATE FUNCTION
     get_subreddit_name(parameter_subreddit_id VARCHAR(10))
-    RETURNS VARCHAR(20)
+    RETURNS VARCHAR(24)
     READS SQL DATA
     BEGIN
         RETURN
@@ -46,13 +51,13 @@ CREATE VIEW schema.comment_date_view AS
 
     With this in place, I define a stored procedure:
     \begin{verbatim}
-CREATE PROCEDURE posts_per_day (
-    IN p_subreddit_name VARCHAR(20),
-    OUT p_posts_per_day FLOAT
+CREATE FUNCTION posts_per_day (
+    p_subreddit_name VARCHAR(24)
 )
+    RETURNS FLOAT(10, 3)
     READS SQL DATA
     BEGIN
-        SET p_posts_per_day =
+        RETURN
             (SELECT AVG(posts_in_day) AS avg_per_day FROM (
             SELECT
                 COUNT(posted_date) AS posts_in_day
@@ -63,24 +68,30 @@ CREATE PROCEDURE posts_per_day (
     END;
     \end{verbatim}
 
-    Calling this procedure as below will then give average posts per day for the passed subreddit name.
+    Selecting from this function as below will then give average posts per day for the passed subreddit name.
     \begin{verbatim}
-CALL posts_per_day ('subreddit_name', @out);
-SELECT @`out`;
+SELECT posts_per_day ('subreddit_name');
     \end{verbatim}
+
+    The results of executing this are shown in figure~\ref{fig:sub_ppd}.
+
+\begin{figure}[h]
+    \includegraphics[width=400px] {function_avg_p_day}\label{fig:sub_ppd}
+    \caption {The query was run in about 4min 20s}
+\end{figure}
 
 \subsection{How many comments include the word 'lol'}\label{subsec:how-many-comments-include}
 
 Start by defining a procedure that stores the number of comments with the desired word in the out parameter.
 
 \begin{verbatim}
-CREATE PROCEDURE posts_containing (
-    IN p_term VARCHAR(50),
-    OUT number_containing INT
+CREATE FUNCTION posts_containing (
+    p_term VARCHAR(50)
 )
+    RETURNS INT
     READS SQL DATA
     BEGIN
-        SET number_containing = (SELECT COUNT(*) FROM
+        RETURN (SELECT COUNT(*) FROM
             (SELECT * FROM test_db.comments_constrained
             WHERE body LIKE CONCAT('%', p_term, '%')) as contains_term);
     END;
@@ -88,9 +99,15 @@ CREATE PROCEDURE posts_containing (
 
     Then it can easily be called as
     \begin{verbatim}
-CALL posts_containing ('lol', @ccc);
-SELECT @`ccc`;
+SELECT posts_containing ('lol');
     \end{verbatim}
+
+The execution results are shown in figure~\ref{fig:sub_posts_containing}.
+
+\begin{figure}[h]
+    \includegraphics[width=400px] {posts_containing}\label{fig:sub_posts_containing}
+    \caption {The query was run in about 1min 10s}
+\end{figure}
 
     Whether the method should demand spaces around the search phrase is debatable.
     In the case of lol, the word is oftentimes used as one part of a longer word, so it would miss some counts there.
