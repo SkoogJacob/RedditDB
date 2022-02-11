@@ -105,6 +105,8 @@ public class EntryPoint {
         List<String> srcFilePaths = new LinkedList<>();
 
         for (String currArg : args) {
+            if (currArg.equals("--only-load-procedures")) continue;
+
             boolean consumed = false;
             argsLeft--; // Argsleft denotes how many arguments are left after this loop.
             if (testFlag && testFilePath == null) {
@@ -114,14 +116,14 @@ public class EntryPoint {
                 schemaName = currArg;
                 consumed = true;
             }
-            testFlag = currArg.equals("--testOutput");
+            testFlag = currArg.equals("--test-output");
             schemaFlag = currArg.equals("--schema");
 
             // Throwing errors if --testOutput has been passed twice or if it was passed as the final arg
             if ((testFlag && testFilePath != null) || (schemaFlag && schemaName != null)) {
-                throw new IllegalArgumentException("--testOutput may only be specified once!");
+                throw new IllegalArgumentException("--test-output may only be specified once!");
             } else if ((testFlag || schemaFlag) && argsLeft == 0) {
-                throw new IllegalArgumentException("--testOutput and --schema requires an accompanying filepath");
+                throw new IllegalArgumentException("--test-output and --schema requires an accompanying argument");
             }
 
             if (!testFlag && !schemaFlag && !consumed) srcFilePaths.add(currArg);

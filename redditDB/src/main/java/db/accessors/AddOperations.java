@@ -41,12 +41,30 @@ public class AddOperations {
         addPotentialInteractionsProcedure(statement);
         // Add procedure to find all users who have particiapted in at most n subreddits
         addPostedToMaxNSubreddits(statement);
+        // Add a view showing posted date instead of epoch as well as subreddit name instead of id
+        addPrettyView(statement);
 
         // Finally, execute batch
         statement.executeBatch();
         // Close resources
         statement.close();
         conn.close();
+    }
+
+    private static void addPrettyView(Statement statement) throws SQLException {
+        statement.addBatch("""
+            CREATE VIEW comments AS SELECT
+                id,
+                parent_id,
+                link_id,
+                type,
+                author,
+                body,
+                get_subreddit_name(subreddit_id) AS subreddit,
+                score,
+                epoch_to_date(created_utc) AS posted_date
+            FROM comments_constrained;
+            """);
     }
 
     private static void addPostedToMaxNSubreddits(Statement statement) throws SQLException {
