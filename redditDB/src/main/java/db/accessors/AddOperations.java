@@ -139,7 +139,7 @@ public class AddOperations {
                     SELECT author, SUM(score) AS total_score
                     FROM comments_constrained
                     WHERE NOT author='[deleted]'
-                    GROUP BY author
+                    GROUP BY author;
             """);
     }
 

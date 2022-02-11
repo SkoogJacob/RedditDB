@@ -136,22 +136,36 @@ CREATE PROCEDURE subreddits_from_link_id (
     END;
     \end{verbatim}
 
-    \subsection{Which users have the highest and lowest scores?} \label{subsec:user-high-low-scores}
+    The results from me running this procedure is shown in figure~\ref{fig:subreddits_from_link} below.
 
-    These two question are basically the same, the only difference is if it is ORDER BY \ldots ASC or ORDER BY \ldots DESC .
-    I will show the DESC variant below.
+\begin{figure}[h]
+    \includegraphics[width=400px] {subreddits_from_link}\label{fig:subreddits_from_link}
+    \caption {The query was run in about 9s}
+\end{figure}
+
+
+\subsection{Which users have the highest and lowest scores?} \label{subsec:user-high-low-scores}
+
+    These two question are basically the same, the only difference is if it is ORDER BY \ldots ASC or ORDER BY \ldots DESC.
+    So I will create a view that queries the total scores of each user, and then it can be simply ordered by the total\_score column.
+
+    Querying this view is very slow \lparen see fig~\ref{fig:user_total_score}\rparen as the GROUP BY author call is very expensive.
+    It would likely be beneficial to store this as its own table to avoid having to re-compute it on every call.
+    It would obviously require more storage space as what is essentially more copies of data need to be stored.
+    But, considering that the computation was taking over an hour for me, it is likely worth the cost.
+    Adding a trigger rule in the database that updates the values when a new value is inserted after this extra table is set up would help with keeping the database easy to use so the user won't forget updating total scores.
+
+\begin{figure}[h]
+    \includegraphics[width=400px] {TODO}\label{fig:user_total_score}
+    \caption {The query was run in about 1h 20min}
+\end{figure}
 
     \begin{verbatim}
-CREATE PROCEDURE user_highscores (
-)
-    READS SQL DATA
-BEGIN
+CREATE user_total_scores AS
     SELECT author, SUM(score) AS total_score
         FROM comments_constrained
         WHERE NOT author='[deleted]'
-        GROUP BY author
-        ORDER BY total_score DESC;
-END;
+        GROUP BY author;
     \end{verbatim}
 
     \subsection{Which subreddits have highest and lowest scores?} \label{subsec:subreddit-high-low-scores}
