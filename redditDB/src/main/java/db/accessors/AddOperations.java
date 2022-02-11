@@ -34,7 +34,7 @@ public class AddOperations {
         // Adds a procedure to select what subreddits commenters of a particular thread have particiapted in
         addParticipatedInFromPost(statement);
         // Adds procedures to get lowest and highest score users in the dataset.
-        addHighLowScoreProcedures(statement);
+        addTotalScoresView(statement);
         // Adds procedures to find the subreddits with the highest and lowest scores
         addHighLowSubredditScoreProcedures(statement);
         // Add procedure to find all users that one user might have potentially interacted with
@@ -133,28 +133,13 @@ public class AddOperations {
     }
 
 
-    private static void addHighLowScoreProcedures(Statement statement) throws SQLException {
+    private static void addTotalScoresView(Statement statement) throws SQLException {
         statement.addBatch("""
-            CREATE PROCEDURE user_highscores ()
-                READS SQL DATA
-                BEGIN
+            CREATE VIEW user_total_scores AS
                     SELECT author, SUM(score) AS total_score
                     FROM comments_constrained
                     WHERE NOT author='[deleted]'
                     GROUP BY author
-                    ORDER BY total_score DESC;
-                END;
-            """);
-        statement.addBatch("""
-            CREATE PROCEDURE user_lowscores ()
-                READS SQL DATA
-                BEGIN
-                    SELECT author, SUM(score) AS total_score
-                    FROM comments_constrained
-                    WHERE NOT author='[deleted]'
-                    GROUP BY author
-                    ORDER BY total_score;
-                END;
             """);
     }
 
